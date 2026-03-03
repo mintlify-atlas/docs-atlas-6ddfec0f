@@ -317,6 +317,45 @@ type ToastHandler = (message: Message, options?: ToastOptions) => string;
 
 Returns the ID of the created toast.
 
+---
+
+## Utility Functions
+
+### resolveValue
+
+Helper function to resolve a value that can be either static or a function.
+
+```tsx
+export const resolveValue = <TValue, TArg>(
+  valOrFunction: ValueOrFunction<TValue, TArg>, 
+  arg: TArg
+): TValue
+```
+
+<ParamField path="valOrFunction" type="ValueOrFunction<TValue, TArg>">
+  Either a static value or a function that returns a value.
+</ParamField>
+
+<ParamField path="arg" type="TArg">
+  The argument to pass to the function if `valOrFunction` is a function.
+</ParamField>
+
+**Returns**: The resolved value of type `TValue`.
+
+**Example**:
+
+```tsx
+import { resolveValue } from 'solid-toast';
+
+// With a static value
+const result1 = resolveValue('Hello', null); // 'Hello'
+
+// With a function
+const result2 = resolveValue((t) => `Toast ${t.id}`, { id: '123' }); // 'Toast 123'
+```
+
+This utility is used internally by Solid Toast to support both static messages and dynamic message functions, but it's also exported for user convenience.
+
 ## Example Usage
 
 ```tsx
