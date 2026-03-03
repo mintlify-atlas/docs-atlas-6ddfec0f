@@ -1,0 +1,80 @@
+{
+  "projectType": "sdk-library",
+  "projectName": "Solid Toast",
+  "projectDescription": "Customizable toast notifications library for SolidJS applications",
+  "theme": "palm",
+  "primaryColor": "#FF8C42",
+  "lightColor": "#FFB380",
+  "darkColor": "#E67A32",
+  "navigation": {
+    "groups": [
+      {
+        "group": "Get Started",
+        "pages": [
+          "introduction",
+          "installation",
+          "quickstart"
+        ]
+      },
+      {
+        "group": "Core Concepts",
+        "pages": [
+          "core/toast-function",
+          "core/toaster-component",
+          "core/toast-types",
+          "core/customization"
+        ]
+      },
+      {
+        "group": "Guides",
+        "pages": [
+          "guides/creating-toasts",
+          "guides/styling",
+          "guides/promises",
+          "guides/updating-toasts",
+          "guides/dismissing-toasts"
+        ]
+      },
+      {
+        "group": "API Reference",
+        "pages": [
+          "api/toast",
+          "api/toaster",
+          "api/types"
+        ]
+      },
+      {
+        "group": "Examples",
+        "pages": [
+          "examples/basic",
+          "examples/custom",
+          "examples/advanced"
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Easily Customizable",
+    "Promise API",
+    "Lightweight (4kb)",
+    "Accessible",
+    "SSR Support",
+    "Multiple toast types (success, error, loading, custom)"
+  ],
+  "publicApiSurface": [
+    "toast()",
+    "toast.success()",
+    "toast.error()",
+    "toast.loading()",
+    "toast.custom()",
+    "toast.promise()",
+    "toast.dismiss()",
+    "toast.remove()",
+    "Toaster",
+    "ToastOptions",
+    "ToasterProps",
+    "Toast",
+    "ToastType",
+    "ToastPosition"
+  ]
+}
