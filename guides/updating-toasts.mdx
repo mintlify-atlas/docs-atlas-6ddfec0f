@@ -1,0 +1,287 @@
+---
+title: 'Updating Toasts'
+description: 'Learn how to update existing toasts by reusing their ID'
+---
+
+Every toast in Solid Toast has a unique ID. You can use this ID to update an existing toast instead of creating a new one. This is perfect for showing progress or transitioning from loading to success/error states.
+
+## How It Works
+
+When you create a toast, it returns an ID:
+
+```jsx
+const toastId = toast.loading('Loading...');
+// Returns: "toast-123abc" (unique ID)
+```
+
+You can then use this ID to update the same toast:
+
+```jsx
+toast.success('Loaded!', { id: toastId });
+```
+
+The toast smoothly transitions from the loading state to the success state without creating a new notification.
+
+## Basic Pattern
+
+<Steps>
+  <Step title="Create initial toast and save the ID">
+    ```jsx
+    const toastId = toast.loading('Processing...');
+    ```
+  </Step>
+
+  <Step title="Perform your async operation">
+    ```jsx
+    try {
+      const result = await someAsyncOperation();
+      // ...
+    } catch (error) {
+      // ...
+    }
+    ```
+  </Step>
+
+  <Step title="Update the toast with the same ID">
+    ```jsx
+    // On success
+    toast.success('Done!', { id: toastId });
+
+    // Or on error
+    toast.error('Failed!', { id: toastId });
+    ```
+  </Step>
+</Steps>
+
+## Practical Examples
+
+### Loading to Success
+
+```jsx
+import toast from 'solid-toast';
+
+const handleSubmit = async (data) => {
+  const toastId = toast.loading('Saving data...');
+
+  try {
+    await saveToServer(data);
+    toast.success('Data saved successfully!', { id: toastId });
+  } catch (error) {
+    toast.error('Failed to save data', { id: toastId });
+  }
+};
+```
+
+### Multi-Step Process
+
+Update the same toast through multiple steps:
+
+```jsx
+const processOrder = async (order) => {
+  const toastId = toast.loading('Validating order...');
+
+  try {
+    // Step 1
+    await validateOrder(order);
+    toast.loading('Processing payment...', { id: toastId });
+
+    // Step 2
+    await processPayment(order);
+    toast.loading('Sending confirmation...', { id: toastId });
+
+    // Step 3
+    await sendConfirmation(order);
+    toast.success('Order completed!', { id: toastId });
+  } catch (error) {
+    toast.error(`Order failed: ${error.message}`, { id: toastId });
+  }
+};
+```
+
+### File Upload with Progress
+
+```jsx
+const uploadFile = async (file: File) => {
+  const toastId = toast.loading(`Uploading ${file.name}...`);
+
+  try {
+    const result = await uploadToServer(file);
+
+    toast.success(
+      `${file.name} uploaded successfully!`,
+      { id: toastId }
+    );
+
+    return result;
+  } catch (error) {
+    toast.error(
+      `Failed to upload ${file.name}`,
+      { id: toastId }
+    );
+    throw error;
+  }
+};
+```
+
+### API Request with Retry
+
+```jsx
+const fetchWithRetry = async (url: string, retries = 3) => {
+  const toastId = toast.loading('Fetching data...');
+  let lastError;
+
+  for (let i = 0; i < retries; i++) {
+    try {
+      const response = await fetch(url);
+      const data = await response.json();
+
+      toast.success('Data loaded!', { id: toastId });
+      return data;
+    } catch (error) {
+      lastError = error;
+      if (i < retries - 1) {
+        toast.loading(
+          `Retry ${i + 1}/${retries - 1}...`,
+          { id: toastId }
+        );
+      }
+    }
+  }
+
+  toast.error('Failed to fetch data', { id: toastId });
+  throw lastError;
+};
+```
+
+## Updating with Different Options
+
+You can change any toast option when updating:
+
+```jsx
+const toastId = toast.loading('Loading...');
+
+// Update with new styles and duration
+toast.success('Success!', {
+  id: toastId,
+  duration: 5000,
+  style: {
+    'background': '#10b981',
+    'color': '#fff',
+  },
+  icon: '🎉',
+});
+```
+
+## Custom ID
+
+You can also provide your own custom ID:
+
+```jsx
+// Create with custom ID
+toast.loading('Loading user...', { id: 'user-load' });
+
+// Update using the same custom ID
+toast.success('User loaded!', { id: 'user-load' });
+```
+
+This is useful when you need to reference the same toast from different parts of your code.
+
+## Preventing Duplicate Toasts
+
+Use a consistent ID to prevent creating duplicate toasts:
+
+```jsx
+const showNotification = () => {
+  // Will update the existing toast if it exists,
+  // or create a new one if it doesn't
+  toast('New notification', { id: 'notification' });
+};
+
+// Clicking multiple times won't create multiple toasts
+showNotification();
+showNotification(); // Updates the existing toast
+showNotification(); // Updates the existing toast
+```
+
+## Complete Example
+
+Here's a full example combining multiple concepts:
+
+```jsx
+import { createSignal } from 'solid-js';
+import toast from 'solid-toast';
+
+const FileUploader = () => {
+  const [uploading, setUploading] = createSignal(false);
+
+  const handleUpload = async (file: File) => {
+    setUploading(true);
+    const toastId = toast.loading('Preparing upload...');
+
+    try {
+      // Validate file
+      if (file.size > 5 * 1024 * 1024) {
+        throw new Error('File too large (max 5MB)');
+      }
+
+      // Upload file
+      toast.loading('Uploading file...', { id: toastId });
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (!response.ok) {
+        throw new Error('Upload failed');
+      }
+
+      const result = await response.json();
+
+      // Success!
+      toast.success(
+        `${file.name} uploaded successfully!`,
+        {
+          id: toastId,
+          duration: 4000,
+          icon: '✅',
+        }
+      );
+
+      return result;
+    } catch (error) {
+      toast.error(
+        error.message || 'Upload failed',
+        {
+          id: toastId,
+          duration: 5000,
+        }
+      );
+      throw error;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return (
+    <input
+      type="file"
+      onChange={(e) => {
+        const file = e.target.files?.[0];
+        if (file) handleUpload(file);
+      }}
+      disabled={uploading()}
+    />
+  );
+};
+```
+
+## Best Practices
+
+- **Always save the toast ID** when you plan to update it later
+- **Use descriptive messages** at each update stage
+- **Handle both success and error cases** to ensure the toast always resolves
+- **Consider using `toast.promise()`** instead if you're working with a single Promise (see [Promise Toasts](/guides/promises))
+- **Clean up** by ensuring loading toasts are always updated or dismissed

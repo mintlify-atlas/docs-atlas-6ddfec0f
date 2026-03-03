@@ -1,0 +1,181 @@
+---
+title: '<Toaster />'
+description: 'API reference for the Toaster component'
+---
+
+## Toaster
+
+The `<Toaster />` component renders all active toasts. It must be placed in your app to display toast notifications.
+
+```tsx
+import { Toaster } from 'solid-toast';
+
+function App() {
+  return (
+    <>
+      <Toaster />
+      {/* Your app content */}
+    </>
+  );
+}
+```
+
+## Props
+
+All props are optional and allow you to customize the default behavior and appearance of toasts.
+
+```tsx
+interface ToasterProps {
+  position?: ToastPosition;
+  toastOptions?: DefaultToastOptions;
+  gutter?: number;
+  containerStyle?: JSX.CSSProperties;
+  containerClassName?: string;
+}
+```
+
+<ParamField path="position" type="ToastPosition">
+  Default position for all toasts. Can be overridden per toast.
+  
+  Options: `'top-left'`, `'top-center'`, `'top-right'`, `'bottom-left'`, `'bottom-center'`, `'bottom-right'`
+  
+  Default: `'top-center'`
+</ParamField>
+
+<ParamField path="toastOptions" type="DefaultToastOptions">
+  Default options to apply to all toasts. Can be overridden per toast.
+  
+  <Expandable title="properties">
+    <ParamField path="id" type="string">
+      Default ID pattern for toasts.
+    </ParamField>
+    
+    <ParamField path="icon" type="Renderable">
+      Default icon for all toasts.
+    </ParamField>
+    
+    <ParamField path="duration" type="number">
+      Default duration in milliseconds before auto-dismiss.
+    </ParamField>
+    
+    <ParamField path="position" type="ToastPosition">
+      Default position for toasts.
+    </ParamField>
+    
+    <ParamField path="style" type="JSX.CSSProperties">
+      Default CSS styles for all toasts.
+    </ParamField>
+    
+    <ParamField path="className" type="string">
+      Default CSS class name for all toasts.
+    </ParamField>
+    
+    <ParamField path="iconTheme" type="IconTheme">
+      Default theme for icons.
+      
+      ```tsx
+      interface IconTheme {
+        primary?: string;
+        secondary?: string;
+      }
+      ```
+    </ParamField>
+    
+    <ParamField path="ariaProps" type="object">
+      Default ARIA attributes.
+      
+      ```tsx
+      {
+        role: 'status' | 'alert';
+        'aria-live': 'assertive' | 'off' | 'polite';
+      }
+      ```
+    </ParamField>
+    
+    <ParamField path="unmountDelay" type="number">
+      Default delay before removing from DOM after dismissal.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField path="gutter" type="number">
+  Spacing in pixels between toasts.
+  
+  Default: `8`
+</ParamField>
+
+<ParamField path="containerStyle" type="JSX.CSSProperties">
+  Custom CSS styles for the toast container element.
+</ParamField>
+
+<ParamField path="containerClassName" type="string">
+  CSS class name to apply to the toast container element.
+</ParamField>
+
+## Examples
+
+### Custom Position
+
+```tsx
+<Toaster position="bottom-right" />
+```
+
+### Custom Styling
+
+```tsx
+<Toaster
+  toastOptions={{
+    style: {
+      background: '#363636',
+      color: '#fff',
+    },
+    duration: 4000,
+  }}
+/>
+```
+
+### Custom Gutter
+
+```tsx
+<Toaster gutter={16} />
+```
+
+### Container Styling
+
+```tsx
+<Toaster
+  containerStyle={{
+    top: 20,
+    left: 20,
+    bottom: 20,
+    right: 20,
+  }}
+  containerClassName="custom-toast-container"
+/>
+```
+
+### Complete Configuration
+
+```tsx
+<Toaster
+  position="top-right"
+  gutter={12}
+  toastOptions={{
+    duration: 5000,
+    style: {
+      background: '#333',
+      color: '#fff',
+      padding: '16px',
+      borderRadius: '8px',
+    },
+    iconTheme: {
+      primary: '#fff',
+      secondary: '#333',
+    },
+  }}
+/>
+```
+
+<Note>
+  The `<Toaster />` component should only be rendered once in your application. All toast notifications will be displayed through this single instance.
+</Note>

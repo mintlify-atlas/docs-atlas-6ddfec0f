@@ -1,0 +1,229 @@
+---
+title: Custom Toast Examples
+description: Create fully customized toast notifications with custom JSX, icons, and styling
+---
+
+## Custom JSX Content
+
+Use `toast.custom()` to render completely custom JSX content:
+
+```jsx
+import toast from 'solid-toast';
+
+toast.custom(() => (
+  <div>
+    <h1>Custom Toast</h1>
+    <p>This is a custom toast!</p>
+  </div>
+));
+```
+
+## Accessing Toast Lifecycle
+
+The custom function receives the toast object as a parameter, giving you access to its properties and state:
+
+```jsx
+toast.custom((t) => (
+  <div>
+    <h1>Custom Toast</h1>
+    <p>This is a custom toast!</p>
+    <p>{t.visible ? 'Showing' : 'I will close in 1 second'}</p>
+    <button onClick={() => toast.dismiss(t.id)}>Close Toast</button>
+  </div>
+), {
+  unmountDelay: 1000,
+});
+```
+
+<Info>
+  The toast object includes properties like `visible`, `id`, `paused`, `createdAt`, and more. Use these to create interactive toast notifications.
+</Info>
+
+## Custom Icons
+
+Add custom icons to any toast type:
+
+<Tabs>
+  <Tab title="Emoji Icon">
+    ```jsx
+    toast('Order received!', {
+      icon: '🍩'
+    });
+    
+    toast.success('Payment successful', {
+      icon: '💰'
+    });
+    ```
+  </Tab>
+  
+  <Tab title="JSX Icon">
+    ```jsx
+    toast('New message', {
+      icon: (
+        <svg width="20" height="20" viewBox="0 0 20 20">
+          <path d="M10 0C4.48 0 0 4.48 0 10s4.48 10 10 10 10-4.48 10-10S15.52 0 10 0z" />
+        </svg>
+      )
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Icon Theme">
+    ```jsx
+    // Customize built-in icon colors
+    toast.success('Success!', {
+      iconTheme: {
+        primary: '#10b981',
+        secondary: '#fff'
+      }
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Custom Styling
+
+Fully customize the appearance of your toasts:
+
+<Tabs>
+  <Tab title="Inline Styles">
+    ```jsx
+    toast.success('Add Custom Styles', {
+      style: {
+        color: '#c2410c',
+        background: '#ffedd5',
+        'border-radius': '8px',
+        padding: '16px',
+      }
+    });
+    ```
+  </Tab>
+  
+  <Tab title="CSS Classes">
+    ```jsx
+    toast('Styled with classes', {
+      className: 'my-custom-toast'
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Combined">
+    ```jsx
+    toast.success('Fully customized', {
+      iconTheme: {
+        primary: '#ea580c',
+        secondary: '#ffedd5'
+      },
+      className: 'border-2 border-orange-800',
+      style: {
+        color: '#c2410c',
+        background: '#ffedd5'
+      },
+      duration: Infinity
+    });
+    ```
+  </Tab>
+</Tabs>
+
+## Advanced Custom Toast with Timer
+
+Create interactive toasts that react to the pause state:
+
+```jsx
+import { createSignal, createEffect, onCleanup } from 'solid-js';
+import toast from 'solid-toast';
+
+const showTimerToast = () => {
+  toast.custom((t) => {
+    const [life, setLife] = createSignal(100);
+    
+    createEffect(() => {
+      if (t.paused) return;
+      
+      const interval = setInterval(() => {
+        setLife(l => l - 0.5);
+      }, 10);
+      
+      onCleanup(() => clearInterval(interval));
+    });
+    
+    return (
+      <div class="bg-pink-100 shadow-md px-4 py-3 rounded overflow-hidden relative text-pink-700">
+        <div 
+          style={{width: `${life()}%`}} 
+          class="bg-pink-200 h-full absolute top-0 left-0"
+        />
+        <span class="relative">Timer In The Background</span>
+      </div>
+    );
+  }, {
+    duration: 2000,
+    unmountDelay: 1000
+  });
+};
+```
+
+<Note>
+  The toast automatically pauses when the user hovers over it. Check `t.paused` to respond to this state.
+</Note>
+
+## Custom Action Buttons
+
+Add interactive buttons to your toasts:
+
+```jsx
+toast.custom((t) => (
+  <div style={{
+    background: '#fff',
+    padding: '16px',
+    'border-radius': '8px',
+    'box-shadow': '0 4px 6px rgba(0, 0, 0, 0.1)'
+  }}>
+    <h3>Confirm Action</h3>
+    <p>Are you sure you want to continue?</p>
+    <div style={{ display: 'flex', gap: '8px', 'margin-top': '12px' }}>
+      <button 
+        onClick={() => {
+          // Perform action
+          toast.dismiss(t.id);
+          toast.success('Action confirmed!');
+        }}
+        style={{ background: '#10b981', color: '#fff' }}
+      >
+        Confirm
+      </button>
+      <button 
+        onClick={() => toast.dismiss(t.id)}
+        style={{ background: '#6b7280', color: '#fff' }}
+      >
+        Cancel
+      </button>
+    </div>
+  </div>
+), {
+  duration: Infinity
+});
+```
+
+## Accessible Custom Toasts
+
+Ensure your custom toasts are accessible:
+
+```jsx
+toast.custom((t) => (
+  <div role="alert" aria-live="assertive">
+    <h3>Important Update</h3>
+    <p>Your session will expire in 5 minutes.</p>
+    <button onClick={() => toast.dismiss(t.id)}>Dismiss</button>
+  </div>
+), {
+  ariaProps: {
+    role: 'alert',
+    'aria-live': 'assertive'
+  }
+});
+```
+
+<Info>
+  Default ARIA props are `role="status"` and `aria-live="polite"`. Use `alert` and `assertive` for urgent messages.
+</Info>

@@ -1,0 +1,207 @@
+---
+title: 'Styling Toasts'
+description: 'Customize the appearance of your toasts with styles, classes, and themes'
+---
+
+Solid Toast provides multiple ways to style your toasts. You can use inline styles, CSS classes, or customize icon themes.
+
+## Styling Methods
+
+### Style Object
+
+Use the `style` option to apply inline CSS styles:
+
+```jsx
+import toast from 'solid-toast';
+
+toast('Styled toast!', {
+  style: {
+    'background-color': '#f00',
+    'color': '#fff',
+    'font-weight': 'bold',
+    'padding': '16px',
+  },
+});
+```
+
+The `style` option accepts a SolidJS `JSX.CSSProperties` object. Note that CSS properties should be in kebab-case or camelCase.
+
+### CSS Classes
+
+Apply custom CSS classes using the `className` option:
+
+```jsx
+toast('Custom class toast!', {
+  className: 'my-custom-toast',
+});
+```
+
+```css
+.my-custom-toast {
+  background: linear-gradient(to right, #667eea, #764ba2);
+  color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+```
+
+### Container Styling
+
+Style the toast container using the `Toaster` component:
+
+```jsx
+import { Toaster } from 'solid-toast';
+
+<Toaster
+  containerClassName="toast-container"
+  containerStyle={{
+    top: '20px',
+    right: '20px',
+  }}
+/>
+```
+
+## Default Styling
+
+Set default styles for all toasts via the `Toaster` component:
+
+```jsx
+<Toaster
+  toastOptions={{
+    className: '',
+    duration: 5000,
+    style: {
+      background: '#363636',
+      color: '#fff',
+      'border-radius': '8px',
+      'padding': '16px',
+    },
+  }}
+/>
+```
+
+Individual toast options will override these defaults.
+
+## Icon Theming
+
+### Icon Theme Colors
+
+Customize the colors of default icons (success, error, loading) using `iconTheme`:
+
+```jsx
+toast.success('Saved!', {
+  iconTheme: {
+    primary: '#fff',
+    secondary: '#000',
+  },
+});
+```
+
+The `iconTheme` object has two properties:
+
+- **primary**: Main color of the icon
+- **secondary**: Accent/background color of the icon
+
+### Custom Icons
+
+Replace the default icon entirely with a custom one:
+
+```jsx
+// Emoji icon
+toast.success('File uploaded!', {
+  icon: '📁',
+});
+
+// JSX icon
+toast.error('Upload failed', {
+  icon: <CustomErrorIcon />,
+});
+```
+
+## Practical Examples
+
+### Dark Theme Toast
+
+```jsx
+toast('Dark theme notification', {
+  style: {
+    'background': '#1a1a1a',
+    'color': '#fff',
+    'border': '1px solid #333',
+  },
+  iconTheme: {
+    primary: '#fff',
+    secondary: '#1a1a1a',
+  },
+});
+```
+
+### Success with Custom Colors
+
+```jsx
+toast.success('Payment processed!', {
+  style: {
+    'background': '#10b981',
+    'color': '#fff',
+  },
+  iconTheme: {
+    primary: '#fff',
+    secondary: '#10b981',
+  },
+});
+```
+
+### Error with Custom Styling
+
+```jsx
+toast.error('Login failed', {
+  style: {
+    'background': '#ef4444',
+    'color': '#fff',
+    'border-radius': '12px',
+    'padding': '20px',
+  },
+  iconTheme: {
+    primary: '#fff',
+    secondary: '#ef4444',
+  },
+  duration: 6000,
+});
+```
+
+## Combining Styles and Classes
+
+You can use both `style` and `className` together:
+
+```jsx
+toast('Combined styling!', {
+  className: 'custom-toast',
+  style: {
+    'border': '2px solid gold',
+  },
+});
+```
+
+The `style` object will be applied as inline styles and will override any conflicting styles from the CSS class.
+
+## ARIA Properties
+
+Customize accessibility attributes:
+
+```jsx
+toast('Important notification', {
+  ariaProps: {
+    role: 'alert',
+    'aria-live': 'assertive',
+  },
+});
+```
+
+Default ARIA properties:
+
+```jsx
+{
+  role: 'status',
+  'aria-live': 'polite'
+}
+```

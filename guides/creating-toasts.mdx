@@ -1,0 +1,130 @@
+---
+title: 'Creating Toasts'
+description: 'Learn how to create different types of toasts in Solid Toast'
+---
+
+Solid Toast provides multiple ways to create notifications based on your needs. Each toast type comes with its own icon and styling.
+
+## Basic Toast Types
+
+### Blank Toast
+
+Create a simple toast without any default icon:
+
+```jsx
+import toast from 'solid-toast';
+
+toast('This is a blank toast!');
+```
+
+Blank toasts are perfect when you want complete control over the appearance or want to add a custom icon.
+
+### Success Toast
+
+Show a success notification with an animated checkmark:
+
+```jsx
+toast.success('Successfully saved!');
+```
+
+The success toast automatically includes an animated checkmark icon. You can customize the icon colors using the `iconTheme` option.
+
+### Error Toast
+
+Display an error notification with an animated error icon:
+
+```jsx
+toast.error('Something went wrong!');
+```
+
+Error toasts are ideal for displaying validation errors, failed requests, or any error state.
+
+### Loading Toast
+
+Show a loading state with a spinner icon:
+
+```jsx
+toast.loading('Loading Photos...');
+```
+
+Loading toasts have an infinite duration by default and are typically updated later with success or error states. See the [Updating Toasts](/guides/updating-toasts) guide for more details.
+
+## Custom Toasts
+
+### Custom Icon
+
+Add a custom icon (emoji or JSX element) to any toast:
+
+```jsx
+toast('Ice cream is ready!', {
+  icon: '🍦',
+});
+```
+
+### Custom JSX Toast
+
+Create a completely custom toast with JSX:
+
+```jsx
+toast.custom(() => (
+  <div>
+    <h1>Custom Toast</h1>
+    <p>This is a custom toast!</p>
+  </div>
+));
+```
+
+### Advanced Custom Toast
+
+Access the toast lifecycle and properties:
+
+```jsx
+toast.custom(
+  (t) => (
+    <div>
+      <h1>Custom Toast</h1>
+      <p>This is a custom toast!</p>
+      <p>{t.visible ? 'Showing' : 'I will close in 1 second'}</p>
+      <button onClick={() => toast.dismiss(t.id)}>Close Toast</button>
+    </div>
+  ),
+  {
+    unmountDelay: 1000,
+  }
+);
+```
+
+## Toast Options
+
+All toast types accept options as the second argument:
+
+```jsx
+toast('This is a simple toast!', {
+  duration: 5000,
+  position: 'top-right',
+  unmountDelay: 500,
+  icon: '🍩',
+});
+```
+
+### Common Options
+
+- **duration**: How long the toast should be visible (in milliseconds)
+- **position**: Where to display the toast (`'top-left'`, `'top-center'`, `'top-right'`, `'bottom-left'`, `'bottom-center'`, `'bottom-right'`)
+- **unmountDelay**: Delay before removing the toast from DOM after dismissal (useful for exit animations)
+- **icon**: Custom icon (emoji string or JSX element)
+- **id**: Custom ID for updating the toast later
+
+For styling options, see the [Styling Guide](/guides/styling).
+
+## Default Durations
+
+Each toast type has a default duration:
+
+- **Blank**: 4000ms (4 seconds)
+- **Success**: 2000ms (2 seconds)
+- **Error**: 4000ms (4 seconds)
+- **Loading**: Infinity (must be dismissed manually)
+- **Custom**: 4000ms (4 seconds)
+
+You can override these by passing a `duration` option.

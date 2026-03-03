@@ -1,0 +1,350 @@
+---
+title: 'toast()'
+description: 'Complete API reference for the toast function and its methods'
+---
+
+## toast()
+
+Create and display a toast notification.
+
+```tsx
+toast(message: Message, options?: ToastOptions): string
+```
+
+<ParamField path="message" type="Message" required>
+  The message to display. Can be a string, JSX element, or a function that receives the toast object and returns a renderable value.
+  
+  ```tsx
+  type Message = ValueOrFunction<Renderable, Toast>
+  type Renderable = JSX.Element | string | null
+  ```
+</ParamField>
+
+<ParamField path="options" type="ToastOptions">
+  Optional configuration for the toast.
+  
+  <Expandable title="properties">
+    <ParamField path="id" type="string">
+      Unique identifier for the toast. If not provided, one will be generated automatically.
+    </ParamField>
+    
+    <ParamField path="icon" type="Renderable">
+      Custom icon to display. Can be a string, JSX element, or null.
+    </ParamField>
+    
+    <ParamField path="duration" type="number">
+      Duration in milliseconds before the toast auto-dismisses. Defaults vary by toast type.
+    </ParamField>
+    
+    <ParamField path="position" type="ToastPosition">
+      Where to display the toast. One of: `'top-left'`, `'top-center'`, `'top-right'`, `'bottom-left'`, `'bottom-center'`, `'bottom-right'`.
+    </ParamField>
+    
+    <ParamField path="style" type="JSX.CSSProperties">
+      Custom CSS styles to apply to the toast.
+    </ParamField>
+    
+    <ParamField path="className" type="string">
+      CSS class name to apply to the toast.
+    </ParamField>
+    
+    <ParamField path="iconTheme" type="IconTheme">
+      Theme configuration for the default icons.
+      
+      ```tsx
+      interface IconTheme {
+        primary?: string;
+        secondary?: string;
+      }
+      ```
+    </ParamField>
+    
+    <ParamField path="ariaProps" type="object">
+      ARIA attributes for accessibility.
+      
+      ```tsx
+      {
+        role: 'status' | 'alert';
+        'aria-live': 'assertive' | 'off' | 'polite';
+      }
+      ```
+    </ParamField>
+    
+    <ParamField path="unmountDelay" type="number">
+      Delay in milliseconds before removing the toast from the DOM after dismissal.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ResponseField name="return" type="string">
+  The unique ID of the created toast.
+</ResponseField>
+
+### Example
+
+```tsx
+import { toast } from 'solid-toast';
+
+// Simple string message
+const id = toast('Hello World');
+
+// With options
+toast('Custom toast', {
+  duration: 5000,
+  position: 'top-center',
+  style: {
+    background: '#333',
+    color: '#fff',
+  },
+});
+
+// With JSX
+toast(<div><strong>Bold</strong> message</div>);
+
+// Dynamic message based on toast state
+toast((t) => `Toast ${t.visible ? 'visible' : 'hidden'}`);
+```
+
+---
+
+## toast.success()
+
+Create and display a success toast with a checkmark icon.
+
+```tsx
+toast.success(message: Message, options?: ToastOptions): string
+```
+
+<ParamField path="message" type="Message" required>
+  The success message to display.
+</ParamField>
+
+<ParamField path="options" type="ToastOptions">
+  Optional configuration. Same as `toast()` options.
+</ParamField>
+
+<ResponseField name="return" type="string">
+  The unique ID of the created toast.
+</ResponseField>
+
+### Example
+
+```tsx
+toast.success('Successfully saved!');
+```
+
+---
+
+## toast.error()
+
+Create and display an error toast with an error icon.
+
+```tsx
+toast.error(message: Message, options?: ToastOptions): string
+```
+
+<ParamField path="message" type="Message" required>
+  The error message to display.
+</ParamField>
+
+<ParamField path="options" type="ToastOptions">
+  Optional configuration. Same as `toast()` options.
+</ParamField>
+
+<ResponseField name="return" type="string">
+  The unique ID of the created toast.
+</ResponseField>
+
+### Example
+
+```tsx
+toast.error('Something went wrong!');
+```
+
+---
+
+## toast.loading()
+
+Create and display a loading toast with a spinner icon.
+
+```tsx
+toast.loading(message: Message, options?: ToastOptions): string
+```
+
+<ParamField path="message" type="Message" required>
+  The loading message to display.
+</ParamField>
+
+<ParamField path="options" type="ToastOptions">
+  Optional configuration. Same as `toast()` options.
+</ParamField>
+
+<ResponseField name="return" type="string">
+  The unique ID of the created toast.
+</ResponseField>
+
+### Example
+
+```tsx
+const id = toast.loading('Saving...');
+
+// Later, update or dismiss it
+toast.success('Saved!', { id });
+```
+
+---
+
+## toast.custom()
+
+Create and display a custom toast without any default icon.
+
+```tsx
+toast.custom(message: Message, options?: ToastOptions): string
+```
+
+<ParamField path="message" type="Message" required>
+  The custom message to display.
+</ParamField>
+
+<ParamField path="options" type="ToastOptions">
+  Optional configuration. Same as `toast()` options.
+</ParamField>
+
+<ResponseField name="return" type="string">
+  The unique ID of the created toast.
+</ResponseField>
+
+### Example
+
+```tsx
+toast.custom(
+  <div class="custom-toast">
+    <MyCustomIcon />
+    <span>Custom notification</span>
+  </div>
+);
+```
+
+---
+
+## toast.promise()
+
+Automatically handles promise states with different toast messages for loading, success, and error states.
+
+```tsx
+toast.promise<T>(
+  promise: Promise<T>,
+  msgs: {
+    loading: Renderable;
+    success: ValueOrFunction<Renderable, T>;
+    error: ValueOrFunction<Renderable, any>;
+  },
+  opts?: DefaultToastOptions
+): Promise<T>
+```
+
+<ParamField path="promise" type="Promise<T>" required>
+  The promise to track.
+</ParamField>
+
+<ParamField path="msgs" type="object" required>
+  Messages for each state.
+  
+  <Expandable title="properties">
+    <ParamField path="loading" type="Renderable" required>
+      Message to show while the promise is pending.
+    </ParamField>
+    
+    <ParamField path="success" type="ValueOrFunction<Renderable, T>" required>
+      Message to show when the promise resolves. Can be a static value or a function that receives the resolved value.
+    </ParamField>
+    
+    <ParamField path="error" type="ValueOrFunction<Renderable, any>" required>
+      Message to show when the promise rejects. Can be a static value or a function that receives the error.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField path="opts" type="DefaultToastOptions">
+  Optional configuration to apply to all toast states.
+</ParamField>
+
+<ResponseField name="return" type="Promise<T>">
+  Returns the original promise.
+</ResponseField>
+
+### Example
+
+```tsx
+const saveData = async () => {
+  const response = await fetch('/api/save', { method: 'POST' });
+  return response.json();
+};
+
+toast.promise(saveData(), {
+  loading: 'Saving...',
+  success: 'Saved successfully!',
+  error: 'Failed to save.',
+});
+
+// With dynamic messages
+toast.promise(fetchUser(id), {
+  loading: 'Loading user...',
+  success: (user) => `Welcome, ${user.name}!`,
+  error: (err) => `Error: ${err.message}`,
+});
+```
+
+---
+
+## toast.dismiss()
+
+Dismiss one or all toasts.
+
+```tsx
+toast.dismiss(toastId?: string): void
+```
+
+<ParamField path="toastId" type="string">
+  The ID of the toast to dismiss. If omitted, all toasts will be dismissed.
+</ParamField>
+
+### Example
+
+```tsx
+// Dismiss a specific toast
+const id = toast.loading('Please wait...');
+toast.dismiss(id);
+
+// Dismiss all toasts
+toast.dismiss();
+```
+
+---
+
+## toast.remove()
+
+Immediately remove one or all toasts from the DOM.
+
+```tsx
+toast.remove(toastId?: string): void
+```
+
+<ParamField path="toastId" type="string">
+  The ID of the toast to remove. If omitted, all toasts will be removed.
+</ParamField>
+
+### Example
+
+```tsx
+// Remove a specific toast
+const id = toast('Hello');
+toast.remove(id);
+
+// Remove all toasts
+toast.remove();
+```
+
+<Note>
+  The difference between `dismiss()` and `remove()` is that `dismiss()` triggers the exit animation before removal, while `remove()` immediately removes the toast from the DOM.
+</Note>

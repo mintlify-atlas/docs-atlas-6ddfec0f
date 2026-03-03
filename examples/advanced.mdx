@@ -1,0 +1,356 @@
+---
+title: Advanced Patterns
+description: Master advanced toast patterns including promises, updates, and programmatic control
+---
+
+## Promise-based Toasts
+
+The `toast.promise()` function automatically handles loading, success, and error states:
+
+### Basic Promise Toast
+
+```jsx
+import toast from 'solid-toast';
+
+const fetchData = () => {
+  return fetch('/api/data').then(res => res.json());
+};
+
+const saveData = () => {
+  const myPromise = fetchData();
+  
+  toast.promise(myPromise, {
+    loading: 'Loading',
+    success: <b>Got the data</b>,
+    error: 'An error occurred 😔',
+  });
+};
+```
+
+### Dynamic Promise Messages
+
+Access the resolved value or error in your messages:
+
+```jsx
+const saveUser = async (name: string) => {
+  const promise = fetch('/api/users', {
+    method: 'POST',
+    body: JSON.stringify({ name })
+  });
+  
+  toast.promise(promise, {
+    loading: 'Saving user...',
+    success: (data) => `User ${data.name} saved successfully!`,
+    error: (err) => `Error: ${err.message}`,
+  });
+};
+```
+
+### Promise with JSX Content
+
+```jsx
+const makePromise = (): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const toss = Math.random();
+      if (toss > 0.5) resolve('Successful!');
+      reject('Something went wrong!');
+    }, 2000);
+  });
+};
+
+const handlePromise = () => {
+  toast.promise(makePromise(), {
+    loading: <span class="promise-txt">Loading Promise</span>,
+    success: msg => <span class="promise-txt">{msg}</span>,
+    error: err => <span class="promise-txt">{err}</span>
+  });
+};
+```
+
+### Promise with Custom Options
+
+Add styling and positioning to promise toasts:
+
+```jsx
+toast.promise(
+  fetchData(),
+  {
+    loading: 'Fetching data...',
+    success: 'Data loaded!',
+    error: 'Failed to load data',
+  },
+  {
+    style: {
+      'min-width': '250px',
+    },
+    position: 'bottom-right',
+  }
+);
+```
+
+## Updating Toast Content
+
+Update an existing toast by reusing its ID:
+
+### Basic Update
+
+```jsx
+const toastId = toast.loading('Loading...');
+
+// Later, update the toast
+toast.success('This worked', {
+  id: toastId,
+});
+```
+
+### Multi-step Process
+
+```jsx
+const processData = async () => {
+  const toastId = toast.loading('Step 1: Validating...');
+  
+  await validate();
+  toast.loading('Step 2: Processing...', { id: toastId });
+  
+  await process();
+  toast.loading('Step 3: Saving...', { id: toastId });
+  
+  await save();
+  toast.success('All steps completed!', { id: toastId });
+};
+```
+
+### Updating with New Options
+
+```jsx
+const toastId = toast('Initial message', {
+  icon: '⏳'
+});
+
+// Update message and icon
+toast.success('Updated message', {
+  id: toastId,
+  icon: '✅',
+  duration: 2000
+});
+```
+
+<Note>
+  When updating a toast, all previous options are preserved unless explicitly overridden. Set `duration: undefined` to maintain the original duration.
+</Note>
+
+## Programmatic Dismiss
+
+Control when toasts are dismissed:
+
+<Tabs>
+  <Tab title="Dismiss Single">
+    ```jsx
+    const toastId = toast.loading('Loading...');
+    
+    // Later, dismiss this specific toast
+    toast.dismiss(toastId);
+    ```
+  </Tab>
+  
+  <Tab title="Dismiss All">
+    ```jsx
+    // Dismiss all visible toasts
+    toast.dismiss();
+    ```
+  </Tab>
+  
+  <Tab title="Instant Remove">
+    ```jsx
+    const toastId = toast('Will be removed instantly');
+    
+    // Remove without exit animation
+    toast.remove(toastId);
+    
+    // Remove all toasts instantly
+    toast.remove();
+    ```
+  </Tab>
+</Tabs>
+
+### Dismiss with Delay
+
+```jsx
+const toastId = toast('This will dismiss after animation');
+
+// Trigger dismiss (waits for unmountDelay)
+toast.dismiss(toastId);
+
+// Or customize the unmount delay
+toast('Custom unmount delay', {
+  unmountDelay: 1000 // Wait 1 second before removing from DOM
+});
+```
+
+<Info>
+  The default `unmountDelay` is 500ms, allowing time for exit animations to complete.
+</Info>
+
+## Combining Multiple Features
+
+Build sophisticated toast notifications by combining features:
+
+```jsx
+import { createSignal } from 'solid-js';
+import toast from 'solid-toast';
+
+const uploadFile = async (file: File) => {
+  const toastId = toast.custom((t) => {
+    const [progress, setProgress] = createSignal(0);
+    
+    // Simulate upload progress
+    const interval = setInterval(() => {
+      setProgress(p => {
+        if (p >= 100) {
+          clearInterval(interval);
+          return 100;
+        }
+        return p + 10;
+      });
+    }, 200);
+    
+    return (
+      <div style={{
+        background: '#fff',
+        padding: '16px',
+        'border-radius': '8px',
+        'min-width': '300px'
+      }}>
+        <h4>Uploading {file.name}</h4>
+        <div style={{
+          width: '100%',
+          height: '8px',
+          background: '#e5e7eb',
+          'border-radius': '4px',
+          overflow: 'hidden',
+          'margin-top': '8px'
+        }}>
+          <div style={{
+            width: `${progress()}%`,
+            height: '100%',
+            background: '#3b82f6',
+            transition: 'width 0.3s'
+          }} />
+        </div>
+        <button 
+          onClick={() => toast.dismiss(t.id)}
+          style={{ 'margin-top': '8px' }}
+        >
+          Cancel
+        </button>
+      </div>
+    );
+  }, {
+    duration: Infinity,
+    position: 'bottom-right'
+  });
+  
+  try {
+    const result = await actualUpload(file);
+    toast.success('Upload complete!', { id: toastId });
+    return result;
+  } catch (error) {
+    toast.error('Upload failed', { id: toastId });
+    throw error;
+  }
+};
+```
+
+## SSR Considerations
+
+Solid Toast works seamlessly with SSR, but keep these points in mind:
+
+### Safe SSR Usage
+
+```jsx
+import { onMount } from 'solid-js';
+import toast, { Toaster } from 'solid-toast';
+
+const App = () => {
+  // Call toast only after component mounts (client-side only)
+  onMount(() => {
+    toast('Welcome!');
+  });
+  
+  return (
+    <div>
+      <Toaster />
+      {/* Your app */}
+    </div>
+  );
+};
+```
+
+### Event Handlers (Safe)
+
+```jsx
+// Event handlers are always client-side, so they're safe
+const handleClick = () => {
+  toast.success('Button clicked!');
+};
+
+<button onClick={handleClick}>Click me</button>
+```
+
+<Warning>
+  Never call `toast()` at the module level or during server-side rendering. Always call it inside event handlers, effects, or after `onMount`.
+</Warning>
+
+## Complete Advanced Example
+
+```jsx
+import { Component, createSignal } from 'solid-js';
+import toast, { Toaster } from 'solid-toast';
+
+const makePromise = (): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      const toss = Math.random();
+      if (toss > 0.5) resolve('Successful!');
+      reject('Something went wrong!');
+    }, 2000);
+  });
+};
+
+const App: Component = () => {
+  const popPromise = () => toast.promise(makePromise(), {
+    loading: <span class="promise-txt">Loading Promise</span>,
+    success: msg => <span class="promise-txt">{msg}</span>,
+    error: err => <span class="promise-txt">{err}</span>
+  });
+  
+  const popCustom = () => toast.success('Add Custom Styles', {
+    iconTheme: {
+      primary: '#ea580c',
+      secondary: '#ffedd5'
+    },
+    className: 'border-2 border-orange-800',
+    style: {
+      color: '#c2410c',
+      background: '#ffedd5'
+    },
+    duration: Infinity
+  });
+  
+  const closeAll = () => toast.dismiss();
+  
+  return (
+    <div class="px-6">
+      <Toaster position="top-center" />
+      <h1>Solid Toast Advanced Examples</h1>
+      
+      <button onClick={popPromise}>Promise Toast</button>
+      <button onClick={popCustom}>Custom Styles</button>
+      <button onClick={closeAll}>Close all toasts</button>
+    </div>
+  );
+};
+
+export default App;
+```

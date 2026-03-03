@@ -1,0 +1,494 @@
+---
+title: 'Customization'
+description: 'Customize toast appearance, behavior, and accessibility'
+---
+
+## Overview
+
+Solid Toast provides extensive customization options through the `ToastOptions` interface. You can customize individual toasts or set global defaults via the Toaster component.
+
+## ToastOptions Interface
+
+```typescript
+interface ToastOptions {
+  id?: string;
+  icon?: Renderable;
+  duration?: number;
+  ariaProps?: {
+    role: 'status' | 'alert';
+    'aria-live': 'assertive' | 'off' | 'polite';
+  };
+  className?: string;
+  style?: JSX.CSSProperties;
+  position?: ToastPosition;
+  unmountDelay?: number;
+  iconTheme?: IconTheme;
+}
+```
+
+## Styling Options
+
+### Custom Styles
+
+Use the `style` prop to apply inline CSS styles:
+
+<Tabs>
+  <Tab title="Basic Styling">
+    ```tsx
+    toast.success('Custom styled toast', {
+      style: {
+        background: '#10b981',
+        color: 'white',
+        padding: '16px',
+        'border-radius': '8px',
+      },
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Dark Theme">
+    ```tsx
+    toast('Dark mode notification', {
+      style: {
+        background: '#1f2937',
+        color: '#f9fafb',
+        border: '1px solid #374151',
+        'box-shadow': '0 4px 6px rgba(0, 0, 0, 0.3)',
+      },
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Gradient Background">
+    ```tsx
+    toast.success('Gradient toast', {
+      style: {
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        'font-weight': 'bold',
+      },
+    });
+    ```
+  </Tab>
+</Tabs>
+
+<ParamField path="style" type="JSX.CSSProperties">
+  CSS properties to apply to the toast. Merged with default styles.
+</ParamField>
+
+### CSS Classes
+
+Use the `className` prop for external styling:
+
+```tsx
+toast('Classy notification', {
+  className: 'my-custom-toast',
+});
+```
+
+```css
+/* styles.css */
+.my-custom-toast {
+  background: #f0f9ff;
+  border-left: 4px solid #0284c7;
+  font-family: 'Inter', sans-serif;
+}
+```
+
+<ParamField path="className" type="string">
+  CSS class name to apply to the toast element.
+</ParamField>
+
+<Note>
+  Both `style` and `className` can be used together. Inline styles take precedence.
+</Note>
+
+## Icon Customization
+
+### Custom Icons
+
+Replace the default icon with your own:
+
+<Tabs>
+  <Tab title="String Icon">
+    ```tsx
+    toast.success('Task completed', {
+      icon: '🎉',
+    });
+    
+    toast.error('Failed', {
+      icon: '❌',
+    });
+    ```
+  </Tab>
+  
+  <Tab title="JSX Icon">
+    ```tsx
+    import { CheckCircle } from './icons';
+    
+    toast('Custom icon', {
+      icon: <CheckCircle size={24} color="#22c55e" />,
+    });
+    ```
+  </Tab>
+  
+  <Tab title="No Icon">
+    ```tsx
+    toast.success('Success without icon', {
+      icon: null,
+    });
+    ```
+  </Tab>
+</Tabs>
+
+<ParamField path="icon" type="Renderable">
+  Custom icon to display. Can be a string (emoji), JSX element, or `null` to hide the icon.
+  
+  ```typescript
+  type Renderable = JSX.Element | string | null
+  ```
+</ParamField>
+
+### Icon Theme
+
+Customize the colors of default icons:
+
+```tsx
+toast.success('Custom icon colors', {
+  iconTheme: {
+    primary: '#10b981',
+    secondary: '#ffffff',
+  },
+});
+
+toast.error('Custom error colors', {
+  iconTheme: {
+    primary: '#ef4444',
+    secondary: '#fef2f2',
+  },
+});
+```
+
+<ParamField path="iconTheme" type="IconTheme">
+  Customize default icon colors.
+  
+  ```typescript
+  interface IconTheme {
+    primary?: string;   // Main icon color
+    secondary?: string; // Background/accent color
+  }
+  ```
+</ParamField>
+
+<Accordion title="Icon Theme Example">
+  ```tsx
+  // Global icon theme via Toaster
+  <Toaster
+    toastOptions={{
+      iconTheme: {
+        primary: '#6366f1',
+        secondary: '#e0e7ff',
+      },
+    }}
+  />
+  
+  // Per-toast override
+  toast.loading('Processing...', {
+    iconTheme: {
+      primary: '#f59e0b',
+      secondary: '#fef3c7',
+    },
+  });
+  ```
+</Accordion>
+
+## Duration
+
+Control how long toasts remain visible:
+
+<Tabs>
+  <Tab title="Fixed Duration">
+    ```tsx
+    // Short duration (1 second)
+    toast('Quick message', { duration: 1000 });
+    
+    // Long duration (10 seconds)
+    toast.error('Important error', { duration: 10000 });
+    ```
+  </Tab>
+  
+  <Tab title="Persistent">
+    ```tsx
+    // Never auto-dismiss
+    toast('Must dismiss manually', { duration: Infinity });
+    
+    // Dismiss programmatically later
+    const id = toast('Persistent', { duration: Infinity });
+    setTimeout(() => toast.dismiss(id), 5000);
+    ```
+  </Tab>
+  
+  <Tab title="Default Durations">
+    ```tsx
+    // Uses type-specific defaults:
+    toast.success('2 seconds'); // 2000ms
+    toast.error('4 seconds');   // 4000ms
+    toast.loading('Infinity');  // Infinity
+    toast('4 seconds');         // 4000ms
+    ```
+  </Tab>
+</Tabs>
+
+<ParamField path="duration" type="number" default="3000">
+  Time in milliseconds before the toast auto-dismisses. Use `Infinity` to prevent auto-dismiss.
+  
+  **Type-specific defaults**:
+  - `blank`: 4000ms
+  - `success`: 2000ms
+  - `error`: 4000ms
+  - `loading`: Infinity
+  - `custom`: 4000ms
+</ParamField>
+
+<Warning>
+  Loading toasts default to `Infinity` duration. Always dismiss or update them when operations complete.
+</Warning>
+
+## Position
+
+Control where individual toasts appear:
+
+```tsx
+toast('Top right', { position: 'top-right' });
+toast('Bottom center', { position: 'bottom-center' });
+toast('Top left', { position: 'top-left' });
+```
+
+<ParamField path="position" type="ToastPosition" default="'top-right'">
+  Position of the toast on screen.
+  
+  ```typescript
+  type ToastPosition = 
+    | 'top-left' 
+    | 'top-center' 
+    | 'top-right' 
+    | 'bottom-left' 
+    | 'bottom-center' 
+    | 'bottom-right'
+  ```
+</ParamField>
+
+<Tip>
+  Set a default position via `<Toaster position="...">` and override per toast as needed.
+</Tip>
+
+## Unmount Delay
+
+Control the exit animation duration:
+
+```tsx
+// Fast exit (200ms)
+toast('Quick exit', { unmountDelay: 200 });
+
+// Slow exit (1 second)
+toast('Slow exit', { unmountDelay: 1000 });
+
+// No animation
+toast('Instant removal', { unmountDelay: 0 });
+```
+
+<ParamField path="unmountDelay" type="number" default="500">
+  Time in milliseconds to wait before removing the toast from the DOM after dismissal. Used for exit animations.
+</ParamField>
+
+<Note>
+  The default unmount delay is **500ms**, which allows for smooth exit animations.
+</Note>
+
+## Accessibility
+
+### ARIA Properties
+
+Customize accessibility attributes:
+
+<Tabs>
+  <Tab title="Status Role">
+    ```tsx
+    // Polite, non-intrusive announcement
+    toast('Background update complete', {
+      ariaProps: {
+        role: 'status',
+        'aria-live': 'polite',
+      },
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Alert Role">
+    ```tsx
+    // Urgent, immediate announcement
+    toast.error('Critical error occurred', {
+      ariaProps: {
+        role: 'alert',
+        'aria-live': 'assertive',
+      },
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Off">
+    ```tsx
+    // Don't announce to screen readers
+    toast('Decorative notification', {
+      ariaProps: {
+        role: 'status',
+        'aria-live': 'off',
+      },
+    });
+    ```
+  </Tab>
+</Tabs>
+
+<ParamField path="ariaProps" type="object">
+  ARIA attributes for accessibility.
+  
+  ```typescript
+  {
+    role: 'status' | 'alert';
+    'aria-live': 'assertive' | 'off' | 'polite';
+  }
+  ```
+  
+  **Default**: `{ role: 'status', 'aria-live': 'polite' }`
+</ParamField>
+
+<Accordion title="ARIA Guidelines">
+  **role="status"**: Use for informational messages that don't require immediate attention.
+  
+  **role="alert"**: Use for important messages that require immediate attention (errors, warnings).
+  
+  **aria-live="polite"**: Announces when screen reader is idle (default, non-intrusive).
+  
+  **aria-live="assertive"**: Announces immediately, interrupting current speech.
+  
+  **aria-live="off"**: Doesn't announce to screen readers.
+  
+  ```tsx
+  // Recommended settings
+  toast.success('Saved', {
+    ariaProps: { role: 'status', 'aria-live': 'polite' },
+  });
+  
+  toast.error('Error!', {
+    ariaProps: { role: 'alert', 'aria-live': 'assertive' },
+  });
+  ```
+</Accordion>
+
+## Toast ID
+
+Provide a custom ID for updating or dismissing specific toasts:
+
+```tsx
+// Create with custom ID
+toast.loading('Processing...', { id: 'process-123' });
+
+// Update the same toast
+toast.success('Complete!', { id: 'process-123' });
+
+// Or dismiss it
+toast.dismiss('process-123');
+```
+
+<ParamField path="id" type="string">
+  Custom identifier for the toast. If omitted, a unique ID is generated automatically.
+  
+  Use custom IDs to:
+  - Update existing toasts
+  - Dismiss specific toasts
+  - Prevent duplicate toasts
+</ParamField>
+
+<Tip>
+  Reusing the same `id` updates the existing toast instead of creating a new one.
+</Tip>
+
+## Global Defaults
+
+Set defaults for all toasts via the Toaster component:
+
+```tsx
+<Toaster
+  position="top-center"
+  toastOptions={{
+    duration: 5000,
+    style: {
+      background: '#363636',
+      color: '#fff',
+      'font-family': 'system-ui',
+    },
+    className: 'my-toast',
+    iconTheme: {
+      primary: '#fff',
+      secondary: '#363636',
+    },
+    ariaProps: {
+      role: 'status',
+      'aria-live': 'polite',
+    },
+    unmountDelay: 300,
+  }}
+/>
+```
+
+<Note>
+  Individual toast options override these global defaults.
+</Note>
+
+## Complete Example
+
+```tsx
+import { toast, Toaster } from 'solid-toast';
+
+function App() {
+  const showCustomToast = () => {
+    toast.success('Fully customized!', {
+      id: 'custom-success',
+      duration: 3000,
+      position: 'bottom-right',
+      icon: '🚀',
+      style: {
+        background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+        color: 'white',
+        'border-radius': '12px',
+        'box-shadow': '0 8px 16px rgba(0, 0, 0, 0.2)',
+        padding: '16px 24px',
+        'font-weight': '600',
+      },
+      className: 'custom-success-toast',
+      iconTheme: {
+        primary: '#ffffff',
+        secondary: '#667eea',
+      },
+      ariaProps: {
+        role: 'status',
+        'aria-live': 'polite',
+      },
+      unmountDelay: 400,
+    });
+  };
+  
+  return (
+    <>
+      <Toaster position="top-center" />
+      <button onClick={showCustomToast}>Show Toast</button>
+    </>
+  );
+}
+```
+
+## See Also
+
+- [toast() Function](/core/toast-function) - Main toast API
+- [Toaster Component](/core/toaster-component) - Global configuration
+- [Toast Types](/core/toast-types) - Different toast variants

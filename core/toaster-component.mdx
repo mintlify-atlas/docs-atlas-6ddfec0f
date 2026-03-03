@@ -1,0 +1,299 @@
+---
+title: 'Toaster Component'
+description: 'Configure the toast container and global defaults'
+---
+
+## Overview
+
+The `<Toaster>` component is the container that renders all your toasts. It must be added once to your application, typically in your root component.
+
+## Basic Setup
+
+```tsx
+import { Toaster } from 'solid-toast';
+
+function App() {
+  return (
+    <>
+      <Toaster />
+      <YourApp />
+    </>
+  );
+}
+```
+
+## Component Signature
+
+```typescript
+interface ToasterProps {
+  position?: ToastPosition;
+  toastOptions?: DefaultToastOptions;
+  gutter?: number;
+  containerStyle?: JSX.CSSProperties;
+  containerClassName?: string;
+}
+```
+
+## Props
+
+<ParamField path="position" type="ToastPosition" default="'top-right'">
+  Default position for all toasts. Can be overridden per toast.
+  
+  ```typescript
+  type ToastPosition = 
+    | 'top-left' 
+    | 'top-center' 
+    | 'top-right' 
+    | 'bottom-left' 
+    | 'bottom-center' 
+    | 'bottom-right'
+  ```
+</ParamField>
+
+<ParamField path="toastOptions" type="DefaultToastOptions">
+  Default options applied to all toasts. Individual toast options will override these defaults.
+  
+  ```typescript
+  interface DefaultToastOptions {
+    id?: string;
+    icon?: Renderable;
+    duration?: number;
+    ariaProps?: {
+      role: 'status' | 'alert';
+      'aria-live': 'assertive' | 'off' | 'polite';
+    };
+    className?: string;
+    style?: JSX.CSSProperties;
+    position?: ToastPosition;
+    unmountDelay?: number;
+    iconTheme?: IconTheme;
+  }
+  ```
+</ParamField>
+
+<ParamField path="gutter" type="number" default="8">
+  Spacing between toasts in pixels.
+</ParamField>
+
+<ParamField path="containerStyle" type="JSX.CSSProperties">
+  Custom CSS styles for the toast container element.
+</ParamField>
+
+<ParamField path="containerClassName" type="string">
+  Custom CSS class name for the toast container element.
+</ParamField>
+
+## Position Options
+
+The `position` prop determines where toasts appear on the screen:
+
+<Tabs>
+  <Tab title="Top Positions">
+    ```tsx
+    // Top Left
+    <Toaster position="top-left" />
+    
+    // Top Center
+    <Toaster position="top-center" />
+    
+    // Top Right (default)
+    <Toaster position="top-right" />
+    ```
+    
+    <Note>
+      Top positions are ideal for non-intrusive notifications that don't block content.
+    </Note>
+  </Tab>
+  
+  <Tab title="Bottom Positions">
+    ```tsx
+    // Bottom Left
+    <Toaster position="bottom-left" />
+    
+    // Bottom Center
+    <Toaster position="bottom-center" />
+    
+    // Bottom Right
+    <Toaster position="bottom-right" />
+    ```
+    
+    <Note>
+      Bottom positions work well for actions that relate to content at the bottom of the page.
+    </Note>
+  </Tab>
+</Tabs>
+
+## Setting Global Defaults
+
+Use `toastOptions` to set defaults for all toasts:
+
+```tsx
+<Toaster
+  position="top-center"
+  toastOptions={{
+    // Default options for all toasts
+    duration: 5000,
+    style: {
+      background: '#363636',
+      color: '#fff',
+    },
+    
+    // Default aria attributes
+    ariaProps: {
+      role: 'status',
+      'aria-live': 'polite',
+    },
+  }}
+/>
+```
+
+<Tip>
+  Individual toasts can override these defaults by passing options to `toast()`.
+</Tip>
+
+## Customizing the Container
+
+### Custom Spacing
+
+```tsx
+<Toaster
+  gutter={16}
+  toastOptions={{
+    style: {
+      margin: '4px',
+    },
+  }}
+/>
+```
+
+### Custom Container Styles
+
+```tsx
+<Toaster
+  containerStyle={{
+    top: '80px',  // Offset from navbar
+    left: '20px',
+    right: '20px',
+  }}
+  containerClassName="my-toast-container"
+/>
+```
+
+<Note>
+  The container uses `position: fixed` by default with a high `z-index` (9999) to ensure toasts appear above other content.
+</Note>
+
+## Default Container Styling
+
+The Toaster component applies the following default styles:
+
+```typescript
+{
+  position: 'fixed',
+  'z-index': 9999,
+  top: '16px',
+  bottom: '16px',
+  left: '16px',
+  right: '16px',
+  'pointer-events': 'none',
+}
+```
+
+<Warning>
+  Setting `pointer-events: 'none'` on the container allows clicking through to underlying content. Individual toasts re-enable pointer events.
+</Warning>
+
+## Examples
+
+<Accordion title="Dark Theme Toasts">
+  ```tsx
+  <Toaster
+    toastOptions={{
+      style: {
+        background: '#1a1a1a',
+        color: '#fff',
+        border: '1px solid #333',
+      },
+      iconTheme: {
+        primary: '#fff',
+        secondary: '#1a1a1a',
+      },
+    }}
+  />
+  ```
+</Accordion>
+
+<Accordion title="Centered Toasts with Custom Duration">
+  ```tsx
+  <Toaster
+    position="top-center"
+    toastOptions={{
+      duration: 3000,
+      className: 'centered-toast',
+    }}
+    gutter={12}
+  />
+  ```
+</Accordion>
+
+<Accordion title="Bottom Notifications with Long Duration">
+  ```tsx
+  <Toaster
+    position="bottom-right"
+    toastOptions={{
+      duration: 6000,
+      unmountDelay: 300,
+    }}
+    containerStyle={{
+      bottom: '20px',
+      right: '20px',
+    }}
+  />
+  ```
+</Accordion>
+
+<Accordion title="Mobile-Optimized Toasts">
+  ```tsx
+  <Toaster
+    position="top-center"
+    toastOptions={{
+      style: {
+        'max-width': '90vw',
+        'font-size': '14px',
+      },
+    }}
+    containerStyle={{
+      top: '10px',
+      left: '10px',
+      right: '10px',
+    }}
+  />
+  ```
+</Accordion>
+
+## Default Options Reference
+
+These are the built-in defaults:
+
+```typescript
+{
+  id: '',
+  icon: '',
+  unmountDelay: 500,
+  duration: 3000,
+  ariaProps: {
+    role: 'status',
+    'aria-live': 'polite',
+  },
+  className: '',
+  style: {},
+  position: 'top-right',
+  iconTheme: {},
+}
+```
+
+## See Also
+
+- [toast() Function](/core/toast-function) - Create toasts programmatically
+- [Customization](/core/customization) - Customize individual toasts
+- [Toast Types](/core/toast-types) - Different types of toasts

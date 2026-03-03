@@ -1,0 +1,279 @@
+---
+title: 'toast() Function'
+description: 'The main function for creating and managing toasts'
+---
+
+## Overview
+
+The `toast()` function is the primary way to display notifications in Solid Toast. It returns a unique toast ID that can be used to dismiss or update the toast later.
+
+## Basic Usage
+
+```tsx
+import { toast } from 'solid-toast';
+
+function MyComponent() {
+  const notify = () => toast('Hello, World!');
+  
+  return <button onClick={notify}>Show Toast</button>;
+}
+```
+
+## Function Signature
+
+```typescript
+toast(message: Message, options?: ToastOptions): string
+```
+
+<ParamField path="message" type="Message" required>
+  The content to display in the toast. Can be a string, JSX element, or a function that returns either.
+  
+  ```typescript
+  type Message = ValueOrFunction<Renderable, Toast>
+  type Renderable = JSX.Element | string | null
+  ```
+</ParamField>
+
+<ParamField path="options" type="ToastOptions">
+  Optional configuration object for customizing the toast behavior and appearance.
+  
+  ```typescript
+  interface ToastOptions {
+    id?: string;
+    icon?: Renderable;
+    duration?: number;
+    ariaProps?: {
+      role: 'status' | 'alert';
+      'aria-live': 'assertive' | 'off' | 'polite';
+    };
+    className?: string;
+    style?: JSX.CSSProperties;
+    position?: ToastPosition;
+    unmountDelay?: number;
+    iconTheme?: IconTheme;
+  }
+  ```
+</ParamField>
+
+<ParamField path="returns" type="string">
+  Returns a unique toast ID that can be used with `toast.dismiss()` or `toast.remove()`.
+</ParamField>
+
+## Toast Variants
+
+Solid Toast provides several built-in variants for common notification types:
+
+<Tabs>
+  <Tab title="Success">
+    ```tsx
+    toast.success('Successfully saved!');
+    
+    // With options
+    toast.success('User created', {
+      duration: 4000,
+      position: 'bottom-center',
+    });
+    ```
+    
+    Displays a success toast with a checkmark icon. Default duration: **2000ms**
+  </Tab>
+  
+  <Tab title="Error">
+    ```tsx
+    toast.error('Something went wrong');
+    
+    // With custom styling
+    toast.error('Failed to save', {
+      style: {
+        background: '#ff4444',
+        color: 'white',
+      },
+    });
+    ```
+    
+    Displays an error toast with an error icon. Default duration: **4000ms**
+  </Tab>
+  
+  <Tab title="Loading">
+    ```tsx
+    const id = toast.loading('Saving...');
+    
+    // Later, update it
+    setTimeout(() => {
+      toast.success('Saved!', { id });
+    }, 2000);
+    ```
+    
+    Displays a loading spinner. Default duration: **Infinity** (must be manually dismissed)
+  </Tab>
+  
+  <Tab title="Custom">
+    ```tsx
+    toast.custom((t) => (
+      <div class="custom-toast">
+        <h3>Custom Toast</h3>
+        <p>This is a completely custom toast</p>
+        <button onClick={() => toast.dismiss(t.id)}>Close</button>
+      </div>
+    ));
+    ```
+    
+    Displays a custom toast without any default styling. Default duration: **4000ms**
+  </Tab>
+  
+  <Tab title="Blank">
+    ```tsx
+    toast('Just a message');
+    // or explicitly
+    toast.blank('Plain notification');
+    ```
+    
+    Displays a basic toast without icons. Default duration: **4000ms**
+  </Tab>
+</Tabs>
+
+## toast.promise()
+
+Automatically handles promise states with different messages:
+
+```typescript
+toast.promise<T>(
+  promise: Promise<T>,
+  msgs: {
+    loading: Renderable;
+    success: ValueOrFunction<Renderable, T>;
+    error: ValueOrFunction<Renderable, any>;
+  },
+  opts?: DefaultToastOptions
+): Promise<T>
+```
+
+### Example
+
+```tsx
+const myPromise = fetchData();
+
+toast.promise(myPromise, {
+  loading: 'Loading data...',
+  success: (data) => `Successfully loaded ${data.count} items`,
+  error: (err) => `Error: ${err.message}`,
+});
+```
+
+<Note>
+  The promise is returned unchanged, so you can still chain `.then()` and `.catch()` as needed.
+</Note>
+
+## Dismissing Toasts
+
+### toast.dismiss()
+
+Dismiss a toast programmatically:
+
+```typescript
+toast.dismiss(toastId?: string): void
+```
+
+<ParamField path="toastId" type="string">
+  Optional. The ID of the toast to dismiss. If omitted, dismisses all toasts.
+</ParamField>
+
+<Tabs>
+  <Tab title="Dismiss Specific">
+    ```tsx
+    const id = toast.loading('Processing...');
+    
+    // Later, dismiss this specific toast
+    toast.dismiss(id);
+    ```
+  </Tab>
+  
+  <Tab title="Dismiss All">
+    ```tsx
+    // Dismiss all active toasts
+    toast.dismiss();
+    ```
+  </Tab>
+</Tabs>
+
+### toast.remove()
+
+Immediately remove a toast without animation:
+
+```typescript
+toast.remove(toastId?: string): void
+```
+
+<ParamField path="toastId" type="string">
+  Optional. The ID of the toast to remove. If omitted, removes all toasts.
+</ParamField>
+
+<Warning>
+  `toast.remove()` skips the exit animation. Use `toast.dismiss()` for a smoother user experience.
+</Warning>
+
+```tsx
+// Remove specific toast immediately
+const id = toast('Hello');
+toast.remove(id);
+
+// Remove all toasts immediately
+toast.remove();
+```
+
+## Advanced Usage
+
+### Dynamic Messages
+
+```tsx
+toast((t) => (
+  <div>
+    <p>Toast ID: {t.id}</p>
+    <p>Created at: {new Date(t.createdAt).toLocaleTimeString()}</p>
+    <button onClick={() => toast.dismiss(t.id)}>Dismiss</button>
+  </div>
+));
+```
+
+### Updating Toasts
+
+```tsx
+const id = toast.loading('Uploading...');
+
+// Update the same toast
+setTimeout(() => {
+  toast.success('Upload complete!', { id });
+}, 3000);
+```
+
+<Tip>
+  By passing the same `id` in options, you can update an existing toast instead of creating a new one.
+</Tip>
+
+### Custom Duration
+
+```tsx
+// Short duration
+toast('Quick message', { duration: 1000 });
+
+// Persist until manually dismissed
+toast('Important notice', { duration: Infinity });
+```
+
+## Default Durations
+
+Each toast type has a default duration:
+
+| Type | Duration |
+|------|----------|
+| `blank` | 4000ms |
+| `success` | 2000ms |
+| `error` | 4000ms |
+| `loading` | Infinity |
+| `custom` | 4000ms |
+
+## See Also
+
+- [Toast Types](/core/toast-types) - Learn about different toast types
+- [Customization](/core/customization) - Customize toast appearance
+- [Toaster Component](/core/toaster-component) - Configure the toast container

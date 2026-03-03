@@ -1,0 +1,170 @@
+---
+title: Basic Examples
+description: Learn the fundamentals of Solid Toast with simple, practical examples
+---
+
+## Simple Toast Notifications
+
+The most basic way to show a toast notification:
+
+```jsx
+import toast from 'solid-toast';
+
+const notify = () => toast('Here is your toast.');
+```
+
+## Toast Types
+
+Solid Toast provides several built-in toast types for common use cases.
+
+<Tabs>
+  <Tab title="Blank">
+    ```jsx
+    toast('This is a blank toast!');
+    ```
+    
+    Blank toasts are the default type with no icon. Use them for neutral messages.
+  </Tab>
+  
+  <Tab title="Success">
+    ```jsx
+    toast.success('Successfully saved!');
+    ```
+    
+    Creates a notification with an animated checkmark icon. Perfect for confirming successful operations.
+  </Tab>
+  
+  <Tab title="Error">
+    ```jsx
+    toast.error('Something went wrong!');
+    ```
+    
+    Shows a notification with an animated error icon. Use this for error messages and failed operations.
+  </Tab>
+  
+  <Tab title="Loading">
+    ```jsx
+    toast.loading('Loading Photos...');
+    ```
+    
+    Displays a toast with a loading spinner. This stays visible indefinitely until updated or dismissed.
+  </Tab>
+</Tabs>
+
+## Positioning Toasts
+
+Control where toasts appear on the screen with the `position` option.
+
+<Tabs>
+  <Tab title="Per Toast">
+    ```jsx
+    // Position individual toasts
+    toast('Top Right', { position: 'top-right' });
+    toast('Top Center', { position: 'top-center' });
+    toast('Top Left', { position: 'top-left' });
+    toast('Bottom Right', { position: 'bottom-right' });
+    toast('Bottom Center', { position: 'bottom-center' });
+    toast('Bottom Left', { position: 'bottom-left' });
+    ```
+  </Tab>
+  
+  <Tab title="Global Default">
+    ```jsx
+    import { Toaster } from 'solid-toast';
+    
+    // Set default position for all toasts
+    <Toaster position="top-center" />
+    ```
+    
+    The default position is `top-right`.
+  </Tab>
+</Tabs>
+
+## Duration Customization
+
+Control how long toasts remain visible on screen.
+
+```jsx
+// Show for 5 seconds
+toast('This will disappear after 5 seconds', {
+  duration: 5000
+});
+
+// Show indefinitely
+toast.success('This will stay until dismissed', {
+  duration: Infinity
+});
+
+// Use default durations (varies by type)
+toast('Default: 4000ms');
+toast.success('Default: 2000ms');
+toast.error('Default: 4000ms');
+toast.loading('Default: Infinity');
+```
+
+<Note>
+  Default durations by type:
+  - Blank: 4000ms
+  - Success: 2000ms
+  - Error: 4000ms
+  - Loading: Infinity
+  - Custom: 4000ms
+</Note>
+
+## Setting Default Options
+
+Configure default options for all toasts using the `Toaster` component:
+
+```jsx
+import toast, { Toaster } from 'solid-toast';
+
+const App = () => {
+  return (
+    <div>
+      <Toaster
+        position="top-center"
+        gutter={8}
+        toastOptions={{
+          duration: 5000,
+          style: {
+            background: '#363636',
+            color: '#fff',
+          },
+          className: 'my-toast',
+        }}
+      />
+      {/* Your app content */}
+    </div>
+  );
+};
+```
+
+## Complete Example
+
+Here's a complete example showing basic toast usage:
+
+```jsx
+import { Component } from 'solid-js';
+import toast, { Toaster } from 'solid-toast';
+
+const App: Component = () => {
+  const showBlank = () => toast('Blank Toast');
+  const showSuccess = () => toast.success('Success!');
+  const showError = () => toast.error('Error!');
+  const showLoading = () => toast.loading('Loading...');
+  
+  return (
+    <div>
+      <Toaster position="top-center" />
+      <h1>Solid Toast Examples</h1>
+      
+      <button onClick={showBlank}>Blank Toast</button>
+      <button onClick={showSuccess}>Success Toast</button>
+      <button onClick={showError}>Error Toast</button>
+      <button onClick={showLoading}>Loading Toast</button>
+    </div>
+  );
+};
+
+export default App;
+```

@@ -1,0 +1,80 @@
+---
+title: Introduction
+description: Create beautiful, customizable toast notifications for SolidJS applications
+---
+
+<img src="https://github.com/ardeora/solid-toast/raw/main/assets/header.png" alt="Solid Toast" />
+
+## Beautiful toast notifications for SolidJS
+
+Solid Toast is a lightweight, customizable toast notification library for SolidJS applications. Built with performance and developer experience in mind, it provides a simple API for creating beautiful notifications with minimal setup.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Get started with Solid Toast in your project
+  </Card>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Create your first toast in under a minute
+  </Card>
+  <Card title="Toast types" icon="grid" href="/core/toast-types">
+    Explore all available toast variants
+  </Card>
+  <Card title="Customization" icon="palette" href="/core/customization">
+    Learn how to style and customize toasts
+  </Card>
+</CardGroup>
+
+## Key features
+
+<CardGroup cols={2}>
+  <Card title="Lightweight" icon="feather">
+    Only 4kb minified and gzipped - won't bloat your bundle
+  </Card>
+  <Card title="Easily customizable" icon="paintbrush">
+    Style with CSS objects, classes, or inline styles
+  </Card>
+  <Card title="Promise API" icon="code">
+    Handle async operations with built-in promise support
+  </Card>
+  <Card title="Accessible" icon="universal-access">
+    ARIA compliant with full screen reader support
+  </Card>
+  <Card title="SSR support" icon="server">
+    Works seamlessly with server-side rendering
+  </Card>
+  <Card title="Type-safe" icon="shield">
+    Written in TypeScript with full type definitions
+  </Card>
+</CardGroup>
+
+## Simple and intuitive
+
+Solid Toast provides a clean API that feels natural in SolidJS applications:
+
+```tsx
+import toast, { Toaster } from 'solid-toast';
+
+const App = () => {
+  return (
+    <div>
+      <button onClick={() => toast('Hello from Solid Toast!')}>
+        Show toast
+      </button>
+      <Toaster />
+    </div>
+  );
+};
+```
+
+## Ready to get started?
+
+Follow the installation guide to add Solid Toast to your project, or jump straight to the quick start for a hands-on introduction.
+
+<CardGroup cols={2}>
+  <Card title="Installation" icon="download" href="/installation">
+    Install Solid Toast in your project
+  </Card>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Build your first toast notification
+  </Card>
+</CardGroup>

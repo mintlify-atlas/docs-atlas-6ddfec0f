@@ -1,0 +1,351 @@
+---
+title: 'Dismissing Toasts'
+description: 'Learn how to dismiss and remove toasts programmatically'
+---
+
+Solid Toast provides two ways to remove toasts: `toast.dismiss()` for graceful dismissal with animations, and `toast.remove()` for instant removal.
+
+## toast.dismiss()
+
+The `toast.dismiss()` function triggers the exit animation and marks the toast for removal. The toast will be removed from the DOM after the `unmountDelay` period.
+
+### Dismiss a Single Toast
+
+Pass the toast ID to dismiss a specific toast:
+
+```jsx
+import toast from 'solid-toast';
+
+const toastId = toast.loading('Loading...');
+
+// Later, dismiss this specific toast
+toast.dismiss(toastId);
+```
+
+### Dismiss All Toasts
+
+Call `toast.dismiss()` without any arguments to dismiss all active toasts:
+
+```jsx
+toast.dismiss();
+```
+
+This is useful for "clear all notifications" functionality.
+
+## toast.remove()
+
+The `toast.remove()` function immediately removes toasts from the DOM without triggering exit animations.
+
+### Remove a Single Toast
+
+```jsx
+const toastId = toast('Quick notification');
+
+// Instantly remove without animation
+toast.remove(toastId);
+```
+
+### Remove All Toasts
+
+```jsx
+toast.remove();
+```
+
+## Key Differences
+
+| Feature | `toast.dismiss()` | `toast.remove()` |
+|---------|------------------|------------------|
+| **Animation** | Triggers exit animation | No animation |
+| **Timing** | Waits for `unmountDelay` | Instant removal |
+| **Use Case** | Graceful dismissal | Immediate cleanup |
+| **User Experience** | Smooth | Abrupt |
+
+## unmountDelay
+
+The `unmountDelay` option controls how long to wait (in milliseconds) before removing a dismissed toast from the DOM. This allows time for exit animations to complete.
+
+### Default Behavior
+
+The default `unmountDelay` is **500ms** (from `src/core/defaults.ts:15`):
+
+```typescript
+export const defaultToastOptions: Required<ToastOptions> = {
+  // ...
+  unmountDelay: 500,
+  // ...
+};
+```
+
+### Custom unmountDelay
+
+Set a custom delay per toast:
+
+```jsx
+toast('This toast has a longer exit animation', {
+  unmountDelay: 1000, // 1 second
+});
+```
+
+### Use with Custom Animations
+
+Match the `unmountDelay` to your CSS animation duration:
+
+```jsx
+toast.custom(
+  (t) => (
+    <div
+      class="custom-toast"
+      classList={{ 'toast-exit': !t.visible }}
+    >
+      Custom animated toast
+    </div>
+  ),
+  {
+    unmountDelay: 800, // Matches CSS animation
+  }
+);
+```
+
+```css
+.custom-toast {
+  animation: slideIn 0.3s ease-out;
+}
+
+.toast-exit {
+  animation: slideOut 0.8s ease-in;
+}
+
+@keyframes slideIn {
+  from { transform: translateX(100%); }
+  to { transform: translateX(0); }
+}
+
+@keyframes slideOut {
+  from { transform: translateX(0); }
+  to { transform: translateX(100%); opacity: 0; }
+}
+```
+
+## Practical Examples
+
+### Auto-dismiss After Action
+
+```jsx
+const saveData = async () => {
+  const toastId = toast.loading('Saving...');
+
+  try {
+    await saveToServer();
+    toast.success('Saved!', { id: toastId });
+
+    // Auto-dismiss after 2 seconds
+    setTimeout(() => toast.dismiss(toastId), 2000);
+  } catch (error) {
+    toast.error('Failed to save', { id: toastId });
+  }
+};
+```
+
+### Manual Dismiss Button
+
+```jsx
+toast.custom((t) => (
+  <div class="custom-notification">
+    <p>Important message!</p>
+    <button onClick={() => toast.dismiss(t.id)}>
+      Dismiss
+    </button>
+  </div>
+));
+```
+
+### Clear All Notifications Button
+
+```jsx
+import { Toaster } from 'solid-toast';
+
+const App = () => {
+  return (
+    <div>
+      <button onClick={() => toast.dismiss()}>
+        Clear All Notifications
+      </button>
+      <Toaster />
+    </div>
+  );
+};
+```
+
+### Dismiss on Navigation
+
+```jsx
+import { useNavigate } from '@solidjs/router';
+import toast from 'solid-toast';
+
+const MyComponent = () => {
+  const navigate = useNavigate();
+
+  const handleNavigate = (path: string) => {
+    // Clear all toasts before navigation
+    toast.dismiss();
+    navigate(path);
+  };
+
+  return <button onClick={() => handleNavigate('/home')}>Go Home</button>;
+};
+```
+
+### Conditional Dismiss
+
+```jsx
+const toastId = toast.loading('Processing...');
+
+const result = await processData();
+
+if (result.shouldShowNotification) {
+  // Update to success
+  toast.success('Done!', { id: toastId });
+} else {
+  // Silently dismiss
+  toast.dismiss(toastId);
+}
+```
+
+### Timeout with Manual Dismiss
+
+```jsx
+toast.custom(
+  (t) => (
+    <div>
+      <p>This will auto-close in 5 seconds</p>
+      <button onClick={() => toast.dismiss(t.id)}>
+        Close Now
+      </button>
+    </div>
+  ),
+  {
+    duration: 5000,
+  }
+);
+```
+
+## Implementation Details
+
+From `src/core/toast.ts:51-56` and `src/core/toast.ts:87-92`:
+
+```typescript
+toast.dismiss = (toastId?: string) => {
+  dispatch({
+    type: ActionType.DISMISS_TOAST,
+    toastId,
+  });
+};
+
+toast.remove = (toastId?: string) => {
+  dispatch({
+    type: ActionType.REMOVE_TOAST,
+    toastId,
+  });
+};
+```
+
+Both functions dispatch actions to the internal store:
+- `DISMISS_TOAST`: Sets `visible: false`, triggers animations, waits for `unmountDelay`
+- `REMOVE_TOAST`: Immediately removes the toast from the store
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Use dismiss() for better UX">
+    Prefer `toast.dismiss()` over `toast.remove()` in most cases to provide smooth exit animations:
+
+    ```jsx
+    // ✅ Good - smooth animation
+    toast.dismiss(toastId);
+
+    // ❌ Avoid - abrupt removal
+    toast.remove(toastId);
+    ```
+  </Accordion>
+
+  <Accordion title="Match unmountDelay to animations">
+    Set `unmountDelay` to match your CSS animation duration:
+
+    ```jsx
+    toast('Notification', {
+      unmountDelay: 500, // Same as CSS animation
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Always dismiss loading toasts">
+    Ensure loading toasts are always dismissed or updated:
+
+    ```jsx
+    const toastId = toast.loading('Loading...');
+
+    try {
+      await operation();
+      toast.success('Done!', { id: toastId });
+    } catch (error) {
+      // Don't forget error case!
+      toast.error('Failed', { id: toastId });
+    }
+    ```
+  </Accordion>
+
+  <Accordion title="Use remove() for cleanup only">
+    Reserve `toast.remove()` for situations where you need immediate cleanup:
+
+    ```jsx
+    // Cleanup on component unmount
+    onCleanup(() => {
+      toast.remove(toastId);
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
+
+## Common Patterns
+
+### Dismiss After Duration
+
+```jsx
+const showTemporaryNotification = (message: string) => {
+  const toastId = toast(message, { duration: Infinity });
+
+  // Manually dismiss after 3 seconds
+  setTimeout(() => toast.dismiss(toastId), 3000);
+};
+```
+
+### Dismiss Previous Toast
+
+```jsx
+let currentToastId: string | null = null;
+
+const showNotification = (message: string) => {
+  // Dismiss previous toast if exists
+  if (currentToastId) {
+    toast.dismiss(currentToastId);
+  }
+
+  // Show new toast
+  currentToastId = toast(message);
+};
+```
+
+### Dismiss on Success Only
+
+```jsx
+const toastId = toast.loading('Processing...');
+
+try {
+  await process();
+  // Dismiss loading, don't show success
+  toast.dismiss(toastId);
+} catch (error) {
+  // Show error
+  toast.error('Failed', { id: toastId });
+}
+```

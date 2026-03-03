@@ -1,0 +1,373 @@
+---
+title: 'Toast Types'
+description: 'Different types of toasts for various use cases'
+---
+
+## Overview
+
+Solid Toast provides five built-in toast types, each optimized for different notification scenarios. Each type has its own default styling, icons, and duration.
+
+## Type Definition
+
+```typescript
+type ToastType = 'success' | 'error' | 'loading' | 'blank' | 'custom';
+```
+
+## Blank Toast
+
+The default toast type with no icon or special styling.
+
+<Tabs>
+  <Tab title="Usage">
+    ```tsx
+    import { toast } from 'solid-toast';
+    
+    // Implicit blank type
+    toast('This is a blank toast');
+    
+    // Explicit blank type
+    toast.blank('This is also a blank toast');
+    ```
+  </Tab>
+  
+  <Tab title="Characteristics">
+    - **Default Duration**: 4000ms (4 seconds)
+    - **Icon**: None
+    - **Use Case**: General notifications that don't fit other categories
+  </Tab>
+</Tabs>
+
+<Note>
+  Blank toasts are perfect for simple informational messages that don't require special emphasis.
+</Note>
+
+## Success Toast
+
+Indicates a successful operation with a checkmark icon.
+
+<Tabs>
+  <Tab title="Usage">
+    ```tsx
+    toast.success('Data saved successfully!');
+    
+    // With custom options
+    toast.success('Profile updated', {
+      duration: 3000,
+      position: 'bottom-center',
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Characteristics">
+    - **Default Duration**: 2000ms (2 seconds)
+    - **Icon**: Checkmark (✓)
+    - **Use Case**: Confirming successful actions, completed tasks
+  </Tab>
+  
+  <Tab title="Examples">
+    ```tsx
+    // Form submission
+    const handleSubmit = async (data) => {
+      await saveData(data);
+      toast.success('Form submitted successfully');
+    };
+    
+    // File upload
+    const handleUpload = async (file) => {
+      await uploadFile(file);
+      toast.success(`${file.name} uploaded`);
+    };
+    
+    // User action
+    const handleDelete = async (id) => {
+      await deleteItem(id);
+      toast.success('Item deleted');
+    };
+    ```
+  </Tab>
+</Tabs>
+
+<Tip>
+  Success toasts have a shorter default duration (2s) since positive feedback often doesn't need to persist as long.
+</Tip>
+
+## Error Toast
+
+Indicates a failed operation with an error icon.
+
+<Tabs>
+  <Tab title="Usage">
+    ```tsx
+    toast.error('Failed to save data');
+    
+    // With error details
+    toast.error('Network error: Please check your connection');
+    
+    // With custom styling
+    toast.error('Critical error', {
+      duration: 6000,
+      style: {
+        background: '#dc2626',
+        color: 'white',
+      },
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Characteristics">
+    - **Default Duration**: 4000ms (4 seconds)
+    - **Icon**: Error symbol (✕)
+    - **Use Case**: Error messages, failed operations, validation errors
+  </Tab>
+  
+  <Tab title="Examples">
+    ```tsx
+    // API error
+    const fetchData = async () => {
+      try {
+        const data = await api.get('/data');
+      } catch (error) {
+        toast.error(`Failed to load data: ${error.message}`);
+      }
+    };
+    
+    // Validation error
+    const validateForm = (data) => {
+      if (!data.email) {
+        toast.error('Email is required');
+        return false;
+      }
+      return true;
+    };
+    
+    // Permission error
+    const checkPermission = () => {
+      if (!hasPermission) {
+        toast.error('You do not have permission to perform this action');
+      }
+    };
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  Error toasts should be clear and actionable. Include context about what failed and ideally how to fix it.
+</Warning>
+
+## Loading Toast
+
+Shows a loading spinner for ongoing operations.
+
+<Tabs>
+  <Tab title="Usage">
+    ```tsx
+    // Create loading toast
+    const id = toast.loading('Loading...');
+    
+    // Update when done
+    fetchData().then(() => {
+      toast.success('Data loaded', { id });
+    });
+    
+    // Or dismiss on error
+    fetchData().catch(() => {
+      toast.error('Failed to load', { id });
+    });
+    ```
+  </Tab>
+  
+  <Tab title="Characteristics">
+    - **Default Duration**: Infinity (must be manually dismissed or updated)
+    - **Icon**: Animated spinner
+    - **Use Case**: Long-running operations, async tasks
+  </Tab>
+  
+  <Tab title="Examples">
+    ```tsx
+    // File processing
+    const processFile = async (file) => {
+      const loadingId = toast.loading('Processing file...');
+      
+      try {
+        await processLargeFile(file);
+        toast.success('File processed successfully', { id: loadingId });
+      } catch (error) {
+        toast.error('Processing failed', { id: loadingId });
+      }
+    };
+    
+    // Multi-step operation
+    const performSteps = async () => {
+      const id = toast.loading('Step 1 of 3...');
+      
+      await step1();
+      toast.loading('Step 2 of 3...', { id });
+      
+      await step2();
+      toast.loading('Step 3 of 3...', { id });
+      
+      await step3();
+      toast.success('All steps completed!', { id });
+    };
+    ```
+  </Tab>
+</Tabs>
+
+<Note>
+  Loading toasts persist indefinitely by default. Always update or dismiss them when the operation completes.
+</Note>
+
+## Custom Toast
+
+Provides full control over toast content and styling.
+
+<Tabs>
+  <Tab title="Usage">
+    ```tsx
+    toast.custom((t) => (
+      <div class="my-custom-toast">
+        <h3>Custom Notification</h3>
+        <p>This is completely custom</p>
+        <button onClick={() => toast.dismiss(t.id)}>Close</button>
+      </div>
+    ));
+    
+    // With JSX element
+    toast.custom(
+      <div class="custom-alert">
+        <strong>Alert!</strong> Something happened.
+      </div>
+    );
+    ```
+  </Tab>
+  
+  <Tab title="Characteristics">
+    - **Default Duration**: 4000ms (4 seconds)
+    - **Icon**: None (unless you provide one)
+    - **Use Case**: Unique designs, complex layouts, branded notifications
+  </Tab>
+  
+  <Tab title="Examples">
+    ```tsx
+    // Rich notification with actions
+    toast.custom((t) => (
+      <div class="notification-card">
+        <div class="notification-header">
+          <img src={avatar} alt="User" />
+          <strong>John Doe</strong>
+        </div>
+        <p>Sent you a message</p>
+        <div class="notification-actions">
+          <button onClick={() => {
+            handleView();
+            toast.dismiss(t.id);
+          }}>View</button>
+          <button onClick={() => toast.dismiss(t.id)}>Dismiss</button>
+        </div>
+      </div>
+    ));
+    
+    // Progress notification
+    toast.custom((t) => (
+      <div class="progress-toast">
+        <span>Uploading files...</span>
+        <progress value={uploadProgress()} max="100" />
+        <span>{uploadProgress()}%</span>
+      </div>
+    ), { duration: Infinity });
+    
+    // Branded announcement
+    toast.custom(
+      <div class="brand-announcement">
+        <img src="/logo.svg" alt="Logo" />
+        <h4>New Feature Released!</h4>
+        <p>Check out our latest update</p>
+        <a href="/changelog">Learn More</a>
+      </div>,
+      { duration: 8000 }
+    );
+    ```
+  </Tab>
+</Tabs>
+
+<Warning>
+  Custom toasts don't include default styling. You're responsible for all layout, colors, and interactions.
+</Warning>
+
+## Type Comparison
+
+| Type | Duration | Icon | Common Use Case |
+|------|----------|------|----------------|
+| **blank** | 4000ms | None | General notifications |
+| **success** | 2000ms | Checkmark | Successful operations |
+| **error** | 4000ms | Error icon | Failed operations |
+| **loading** | Infinity | Spinner | Ongoing processes |
+| **custom** | 4000ms | Custom | Unique designs |
+
+## Choosing the Right Type
+
+<Accordion title="When to use Blank">
+  - General information that doesn't fit other categories
+  - Neutral announcements
+  - Tips or suggestions
+  - Non-critical updates
+  
+  ```tsx
+  toast('New messages available');
+  toast('Autosave enabled');
+  ```
+</Accordion>
+
+<Accordion title="When to use Success">
+  - Confirming user actions
+  - Successful API calls
+  - Completed tasks
+  - Positive feedback
+  
+  ```tsx
+  toast.success('Changes saved');
+  toast.success('Email sent');
+  ```
+</Accordion>
+
+<Accordion title="When to use Error">
+  - Failed operations
+  - Validation errors
+  - Network issues
+  - Permission denials
+  
+  ```tsx
+  toast.error('Invalid email format');
+  toast.error('Connection timeout');
+  ```
+</Accordion>
+
+<Accordion title="When to use Loading">
+  - File uploads/downloads
+  - API requests
+  - Data processing
+  - Any operation that takes time
+  
+  ```tsx
+  const id = toast.loading('Uploading...');
+  // Update when complete
+  toast.success('Upload complete', { id });
+  ```
+</Accordion>
+
+<Accordion title="When to use Custom">
+  - Branded notifications
+  - Complex layouts
+  - Interactive toasts
+  - Unique designs not covered by other types
+  
+  ```tsx
+  toast.custom(<MyCustomComponent />);
+  ```
+</Accordion>
+
+## See Also
+
+- [toast() Function](/core/toast-function) - Learn about toast variants
+- [Customization](/core/customization) - Customize toast appearance
+- [Toaster Component](/core/toaster-component) - Configure global defaults

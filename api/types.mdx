@@ -1,0 +1,354 @@
+---
+title: 'TypeScript Types'
+description: 'Complete TypeScript type definitions for Solid Toast'
+---
+
+## Core Types
+
+### Toast
+
+The complete toast object interface.
+
+```tsx
+interface Toast {
+  type: ToastType;
+  id: string;
+  message: ValueOrFunction<Renderable, Toast>;
+  icon?: Renderable;
+  duration?: number;
+  pauseDuration: number;
+  paused: boolean;
+  position?: ToastPosition;
+  ariaProps: {
+    role: 'status' | 'alert';
+    'aria-live': 'assertive' | 'off' | 'polite';
+  };
+  style?: JSX.CSSProperties;
+  className?: string;
+  iconTheme?: IconTheme;
+  createdAt: number;
+  updatedAt?: number;
+  visible: boolean;
+  height?: number;
+  unmountDelay: number;
+}
+```
+
+<ParamField path="type" type="ToastType">
+  The type of toast: `'success'`, `'error'`, `'loading'`, `'blank'`, or `'custom'`.
+</ParamField>
+
+<ParamField path="id" type="string">
+  Unique identifier for the toast.
+</ParamField>
+
+<ParamField path="message" type="ValueOrFunction<Renderable, Toast>">
+  The message content. Can be a static renderable value or a function that receives the toast object.
+</ParamField>
+
+<ParamField path="icon" type="Renderable">
+  Optional custom icon to display.
+</ParamField>
+
+<ParamField path="duration" type="number">
+  Time in milliseconds before the toast auto-dismisses.
+</ParamField>
+
+<ParamField path="pauseDuration" type="number">
+  Accumulated time the toast has been paused.
+</ParamField>
+
+<ParamField path="paused" type="boolean">
+  Whether the toast is currently paused (e.g., on hover).
+</ParamField>
+
+<ParamField path="position" type="ToastPosition">
+  Where the toast is displayed on screen.
+</ParamField>
+
+<ParamField path="ariaProps" type="object">
+  Accessibility attributes for screen readers.
+  
+  <Expandable title="properties">
+    <ParamField path="role" type="'status' | 'alert'">
+      ARIA role attribute.
+    </ParamField>
+    
+    <ParamField path="aria-live" type="'assertive' | 'off' | 'polite'">
+      ARIA live region attribute.
+    </ParamField>
+  </Expandable>
+</ParamField>
+
+<ParamField path="style" type="JSX.CSSProperties">
+  Custom CSS styles applied to the toast.
+</ParamField>
+
+<ParamField path="className" type="string">
+  CSS class name applied to the toast.
+</ParamField>
+
+<ParamField path="iconTheme" type="IconTheme">
+  Theme configuration for the default icon.
+</ParamField>
+
+<ParamField path="createdAt" type="number">
+  Timestamp when the toast was created.
+</ParamField>
+
+<ParamField path="updatedAt" type="number">
+  Timestamp when the toast was last updated.
+</ParamField>
+
+<ParamField path="visible" type="boolean">
+  Whether the toast is currently visible.
+</ParamField>
+
+<ParamField path="height" type="number">
+  The computed height of the toast element.
+</ParamField>
+
+<ParamField path="unmountDelay" type="number">
+  Delay before removing the toast from the DOM after dismissal.
+</ParamField>
+
+---
+
+### ToastOptions
+
+Options for configuring individual toasts.
+
+```tsx
+type ToastOptions = Partial<
+  Pick<
+    Toast,
+    'id' | 'icon' | 'duration' | 'ariaProps' | 'className' | 'style' | 'position' | 'unmountDelay' | 'iconTheme'
+  >
+>;
+```
+
+All properties are optional and allow you to customize specific aspects of a toast.
+
+<Expandable title="properties">
+  <ParamField path="id" type="string">
+    Custom ID for the toast. Useful for updating or dismissing specific toasts.
+  </ParamField>
+  
+  <ParamField path="icon" type="Renderable">
+    Custom icon to display.
+  </ParamField>
+  
+  <ParamField path="duration" type="number">
+    Auto-dismiss duration in milliseconds.
+  </ParamField>
+  
+  <ParamField path="ariaProps" type="object">
+    ARIA attributes for accessibility.
+  </ParamField>
+  
+  <ParamField path="className" type="string">
+    CSS class name.
+  </ParamField>
+  
+  <ParamField path="style" type="JSX.CSSProperties">
+    Custom CSS styles.
+  </ParamField>
+  
+  <ParamField path="position" type="ToastPosition">
+    Display position.
+  </ParamField>
+  
+  <ParamField path="unmountDelay" type="number">
+    Delay before DOM removal after dismissal.
+  </ParamField>
+  
+  <ParamField path="iconTheme" type="IconTheme">
+    Theme for default icons.
+  </ParamField>
+</Expandable>
+
+---
+
+### ToasterProps
+
+Props for the `<Toaster />` component.
+
+```tsx
+interface ToasterProps {
+  position?: ToastPosition;
+  toastOptions?: DefaultToastOptions;
+  gutter?: number;
+  containerStyle?: JSX.CSSProperties;
+  containerClassName?: string;
+}
+```
+
+<ParamField path="position" type="ToastPosition">
+  Default position for all toasts.
+</ParamField>
+
+<ParamField path="toastOptions" type="DefaultToastOptions">
+  Default options applied to all toasts.
+</ParamField>
+
+<ParamField path="gutter" type="number">
+  Spacing between toasts in pixels.
+</ParamField>
+
+<ParamField path="containerStyle" type="JSX.CSSProperties">
+  Custom styles for the container element.
+</ParamField>
+
+<ParamField path="containerClassName" type="string">
+  CSS class name for the container element.
+</ParamField>
+
+---
+
+## Enums and Literals
+
+### ToastType
+
+The type of toast notification.
+
+```tsx
+type ToastType = 'success' | 'error' | 'loading' | 'blank' | 'custom';
+```
+
+- `'success'` - Success notification with checkmark icon
+- `'error'` - Error notification with error icon
+- `'loading'` - Loading notification with spinner icon
+- `'blank'` - Blank notification without default icon
+- `'custom'` - Custom notification without default icon
+
+---
+
+### ToastPosition
+
+Where the toast appears on screen.
+
+```tsx
+type ToastPosition = 
+  | 'top-left' 
+  | 'top-center' 
+  | 'top-right' 
+  | 'bottom-left' 
+  | 'bottom-center' 
+  | 'bottom-right';
+```
+
+---
+
+### IconTheme
+
+Theme configuration for default toast icons.
+
+```tsx
+interface IconTheme {
+  primary?: string;
+  secondary?: string;
+}
+```
+
+<ParamField path="primary" type="string">
+  Primary color for the icon (typically the main icon color).
+</ParamField>
+
+<ParamField path="secondary" type="string">
+  Secondary color for the icon (typically the background or accent color).
+</ParamField>
+
+---
+
+## Utility Types
+
+### Message
+
+Type for toast message content.
+
+```tsx
+type Message = ValueOrFunction<Renderable, Toast>;
+```
+
+Can be a static renderable value or a function that receives the toast object and returns a renderable value.
+
+---
+
+### Renderable
+
+Types that can be rendered in a toast.
+
+```tsx
+type Renderable = JSX.Element | string | null;
+```
+
+---
+
+### ValueOrFunction
+
+A value or a function that returns a value.
+
+```tsx
+type ValueOrFunction<TValue, TArg> = TValue | ValueFunction<TValue, TArg>;
+type ValueFunction<TValue, TArg> = (arg: TArg) => TValue;
+```
+
+Used throughout the API to allow both static values and dynamic functions.
+
+---
+
+### DefaultToastOptions
+
+Alias for `ToastOptions`, used in the context of default options.
+
+```tsx
+type DefaultToastOptions = ToastOptions;
+```
+
+---
+
+### ToastHandler
+
+Function signature for toast creation methods.
+
+```tsx
+type ToastHandler = (message: Message, options?: ToastOptions) => string;
+```
+
+Returns the ID of the created toast.
+
+## Example Usage
+
+```tsx
+import { toast, Toast, ToastOptions, ToasterProps } from 'solid-toast';
+
+// Using ToastOptions
+const options: ToastOptions = {
+  duration: 4000,
+  position: 'top-right',
+  style: {
+    background: '#333',
+    color: '#fff',
+  },
+};
+
+toast('Hello', options);
+
+// Using ToasterProps
+const toasterProps: ToasterProps = {
+  position: 'bottom-center',
+  gutter: 16,
+  toastOptions: {
+    duration: 5000,
+  },
+};
+
+// Dynamic message using Toast type
+toast((t: Toast) => (
+  <div>
+    Toast ID: {t.id}
+    <br />
+    Visible: {t.visible ? 'Yes' : 'No'}
+  </div>
+));
+```

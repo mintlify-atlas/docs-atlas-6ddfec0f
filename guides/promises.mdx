@@ -1,0 +1,260 @@
+---
+title: 'Promise Toasts'
+description: 'Automatically handle loading, success, and error states with toast.promise()'
+---
+
+The `toast.promise()` function automatically manages toast states based on a Promise's lifecycle. This is perfect for async operations like API calls, file uploads, or data fetching.
+
+## How It Works
+
+When you pass a Promise to `toast.promise()`, it:
+
+1. Immediately shows a **loading** toast
+2. Updates to a **success** toast when the Promise resolves
+3. Updates to an **error** toast if the Promise rejects
+
+The toast uses the same ID throughout, creating a smooth transition between states.
+
+## Basic Usage
+
+<Steps>
+  <Step title="Create your async operation">
+    ```jsx
+    const fetchData = async () => {
+      const response = await fetch('/api/data');
+      return response.json();
+    };
+    ```
+  </Step>
+
+  <Step title="Wrap it with toast.promise()">
+    ```jsx
+    import toast from 'solid-toast';
+
+    const myPromise = fetchData();
+
+    toast.promise(myPromise, {
+      loading: 'Loading',
+      success: <b>Got the data</b>,
+      error: 'An error occurred 😔',
+    });
+    ```
+  </Step>
+</Steps>
+
+## Implementation Details
+
+Here's how `toast.promise()` works under the hood (from `src/core/toast.ts:58-85`):
+
+```typescript
+toast.promise = <T>(
+  promise: Promise<T>,
+  msgs: {
+    loading: Renderable;
+    success: ValueOrFunction<Renderable, T>;
+    error: ValueOrFunction<Renderable, any>;
+  },
+  opts?: DefaultToastOptions
+) => {
+  const id = toast.loading(msgs.loading, { ...opts });
+
+  promise
+    .then((p) => {
+      toast.success(resolveValue(msgs.success, p), {
+        id,
+        ...opts,
+      });
+      return p;
+    })
+    .catch((e) => {
+      toast.error(resolveValue(msgs.error, e), {
+        id,
+        ...opts,
+      });
+    });
+
+  return promise;
+};
+```
+
+Key points:
+- Creates a loading toast with a unique ID
+- Updates the same toast ID on success or error
+- Returns the original Promise (doesn't affect Promise chain)
+
+## Dynamic Messages
+
+You can use functions to create dynamic messages based on the resolved or rejected value:
+
+### Success with Response Data
+
+```jsx
+const saveUser = (name: string) => {
+  const promise = fetch('/api/users', {
+    method: 'POST',
+    body: JSON.stringify({ name }),
+  }).then(res => res.json());
+
+  toast.promise(promise, {
+    loading: 'Saving user...',
+    success: (data) => `User ${data.name} saved!`,
+    error: 'Failed to save user',
+  });
+
+  return promise;
+};
+```
+
+### Error with Details
+
+```jsx
+const uploadFile = (file: File) => {
+  const promise = uploadToServer(file);
+
+  toast.promise(promise, {
+    loading: 'Uploading...',
+    success: 'Upload complete!',
+    error: (err) => `Upload failed: ${err.message}`,
+  });
+
+  return promise;
+};
+```
+
+## Practical Examples
+
+### API Request
+
+```jsx
+const handleLogin = async (credentials) => {
+  const promise = fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(credentials),
+  });
+
+  toast.promise(promise, {
+    loading: 'Logging in...',
+    success: <b>Welcome back!</b>,
+    error: 'Invalid credentials',
+  });
+};
+```
+
+### File Upload with Progress
+
+```jsx
+const uploadImage = async (file: File) => {
+  const formData = new FormData();
+  formData.append('image', file);
+
+  const promise = fetch('/api/upload', {
+    method: 'POST',
+    body: formData,
+  });
+
+  toast.promise(promise, {
+    loading: `Uploading ${file.name}...`,
+    success: (response) => `${file.name} uploaded successfully!`,
+    error: (err) => `Failed to upload: ${err.message}`,
+  });
+};
+```
+
+### Data Fetching
+
+```jsx
+const loadPhotos = () => {
+  const promise = fetch('/api/photos').then(res => res.json());
+
+  toast.promise(promise, {
+    loading: 'Loading photos...',
+    success: (data) => `Loaded ${data.length} photos`,
+    error: 'Could not load photos',
+  });
+
+  return promise;
+};
+```
+
+## With Custom Options
+
+Pass additional toast options as the third argument:
+
+```jsx
+const deleteItem = (id: string) => {
+  const promise = fetch(`/api/items/${id}`, { method: 'DELETE' });
+
+  toast.promise(
+    promise,
+    {
+      loading: 'Deleting...',
+      success: 'Item deleted',
+      error: 'Could not delete item',
+    },
+    {
+      duration: 5000,
+      position: 'bottom-right',
+      style: {
+        'background': '#dc2626',
+        'color': '#fff',
+      },
+      iconTheme: {
+        primary: '#fff',
+        secondary: '#dc2626',
+      },
+    }
+  );
+};
+```
+
+## Best Practices
+
+<AccordionGroup>
+  <Accordion title="Always return the Promise">
+    `toast.promise()` returns the original Promise, so you can still use `.then()` and `.catch()` for additional logic:
+
+    ```jsx
+    const result = await toast.promise(myPromise, {
+      loading: 'Loading...',
+      success: 'Done!',
+      error: 'Failed',
+    });
+
+    // Use result here
+    console.log(result);
+    ```
+  </Accordion>
+
+  <Accordion title="Provide clear messages">
+    Make your messages descriptive and user-friendly:
+
+    ```jsx
+    // ❌ Not helpful
+    toast.promise(promise, {
+      loading: 'Please wait...',
+      success: 'Success!',
+      error: 'Error!',
+    });
+
+    // ✅ Clear and specific
+    toast.promise(promise, {
+      loading: 'Creating your account...',
+      success: 'Account created successfully!',
+      error: 'Failed to create account. Please try again.',
+    });
+    ```
+  </Accordion>
+
+  <Accordion title="Use dynamic messages for context">
+    Leverage the response data to provide specific feedback:
+
+    ```jsx
+    toast.promise(saveSettings(settings), {
+      loading: 'Saving settings...',
+      success: (data) => `Settings saved at ${new Date(data.timestamp).toLocaleTimeString()}`,
+      error: (err) => `Error: ${err.message}`,
+    });
+    ```
+  </Accordion>
+</AccordionGroup>
